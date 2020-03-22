@@ -112,9 +112,8 @@ function do_system_update() {
 
 function install_dependancies() {
 	sudo apt update
-	sudo apt install -y screen mc zsh curl git gcc python2.7 pkg-config
-	sudo apt install -y autoconf libtool cmake xz-utils libatomic-ops-dev libunwind-dev g++ gdb libgflags-dev libsnappy-dev ninja-build python3 python3-ply
-	# sudo apt install -y build-essential automake software-properties-common
+	sudo apt install -y autoconf automake build-essential curl cmake git gcc g++ gdb mc ninja-build pkg-config python3 python3-ply python-dev
+	sudo apt install -y libtool libatomic-ops-dev libunwind-dev libgflags-dev libsnappy-dev libxml2-dev libxslt-dev software-properties-common screen zsh xz-utils
 }
 
 function build_boost() {
