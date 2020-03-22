@@ -17,40 +17,35 @@ function print_menu() {
 	echo ""
 	echo ""
 	echo "***************************************************************"
-	echo "*   Symbol CATAPULT install and build script by SUPER HOW?    *"
-	echo "*   - Script builds all Symbol CATAPULT dependancies          *"
-	echo "*   - Script installs all Symbol CATAPULT dependancies        *"
-	echo "*   - Script builds and installs Symbol CATAPULT ${CAT_VER}"
-	echo "*   - Script generates Symbol CATAPULT seed                   *"
-	echo "*                                                             *"
-	echo "*   Script to be run by limited user, will need sudo rights   *"
-	echo "*  															*"
-	echo "*   Prerequisites												*"
-	echo "*		from github/nemtech	for Building on Ubuntu 18.04 (LTS)	*"
-	echo "*   															*"
-	echo "*       -OpenSSL dev library, at least 1.1.1 (libssl-dev)		*"
-	echo "*       -cmake (at least 3.14)								*"
-	echo "*       -git													*"
-	echo "*       -python 3.x											*"
-	echo "*       -gcc 9.2												*"
-	echo "*       -ninja-build - suggested								*"
-	echo "*   															*"
-	echo "*   Instructions below are for gcc, 							*"
-	echo "*					but project compiles with clang 9 as well.	*"
-	echo "*																*"
-	echo "*===================================================+==========*"
-	echo "|    Script version: v${SCRIPT_VER}                            |"
-	echo "|    Crafted with love by: minister, linas and bruce_wayne     |"
-	echo "|    2020 [] https://SUPERHOW.io                               |"
-	echo "*=======================================+======================*"
+	echo "*   Symbol CATAPULT install and build script by SUPER HOW?"
+	echo "*   - build and install all Symbol CATAPULT dependancies"
+	echo "*   - build and install Symbol CATAPULT ${CAT_VER}"
+	echo "*   - generate Symbol CATAPULT seed"
+	echo "**"
+	echo "*   Script to be run by limited user, will need sudo rights"
+	echo "*   Prerequisites from github/nemtech	for building on Ubuntu 18.04"
+	echo "*   Instructions are for gcc, but compiles with clang 9 as well"
+	echo "**"
+	echo "*       - OpenSSL dev library, at least 1.1.1 (libssl-dev)"
+	echo "*       - cmake (at least 3.14)"
+	echo "*       - git"
+	echo "*       - python 3.x"
+	echo "*       - gcc 9.2"
+	echo "*       - ninja-build"
+	echo "**"
+	echo "*=============================================================*"
+	echo "|    Script version: v${SCRIPT_VER}"
+	echo "|    Crafted with love by: ministras, linas and bruce_wayne"
+	echo "|    2020 (C) https://SUPERHOW.io"
+	echo "*=============================================================*"
 	os_version_check
 	echo "*=============================================================*"
 	echo "| MENU:                                                       |"
 	echo "|                                                             |"
-	echo "|  1) Step 1: Build all dependencies and CATAPULT F5          |"
-	echo "|  2) Step 2: Install MONGO.DB, NODE.JS and CATAPULT REST     |"
-	echo "|  3) Step 3: Generate keys and instialize CATAPULT seed      |"
-	echo "|  4) Tool: Just build mijin CATAPULT F5 from git             |"
+	echo "|  1) Step 1: Build all dependencies for CATAPULT F5          |"
+	echo "|  2) Step 2: Build Symbol mijin CATAPULT F5 from git         |"
+	echo "|  3) Step 3: Install MONGO.DB, NODE.JS and CATAPULT REST     |"
+	echo "|  4) Step 4: Generate keys and instialize CATAPULT seed      |"
 	echo "|  5) Tool: TBD                                               |"
 	echo "|  9) Setup Firewall and change SSH port (TODO)               |"
 	echo "|  0) Tool: Just do system update & upgrade                   |"	
@@ -75,7 +70,7 @@ function os_version_check() {
 	fi
 }
 
-function build_all_dependancies() {
+function build_dependancies() {
 	clear
 	echo "*---------------------------------------------------------*"
 	echo "| UPDATE system, install DEPENDANCIES, build TOOLS? [y/n] |"
@@ -98,7 +93,7 @@ function build_all_dependancies() {
 		build_rocksdb
 		# echo "Ar viskas gerai?"
 		# read ANYKEY
-		build_catapult_server_9_3_2
+		#build_catapult_server_9_3_2
 	fi
 }
 
@@ -112,8 +107,8 @@ function do_system_update() {
 
 function install_dependancies() {
 	sudo apt update
-	sudo apt install -y autoconf automake build-essential curl cmake git gcc g++ gdb mc ninja-build pkg-config python3 python3-ply python-dev
-	sudo apt install -y libtool libatomic-ops-dev libunwind-dev libgflags-dev libsnappy-dev libxml2-dev libxslt-dev software-properties-common screen zsh xz-utils
+	sudo apt install -y autoconf automake build-essential curl cmake git gcc g++ gdb mc ninja-build pkg-config python3 python3-ply python-dev software-properties-common
+	sudo apt install -y libtool libssl-dev libatomic-ops-dev libunwind-dev libgflags-dev libsnappy-dev libxml2-dev libxslt-dev screen zsh xz-utils
 }
 
 function build_boost() {
@@ -125,7 +120,7 @@ function build_boost() {
 	mkdir boost-build-1.71.0
 	cd boost_1_71_0
 	./bootstrap.sh --prefix=${HOME}/boost-build-1.71.0
-	./b2 --prefix=${HOME}/boost-build-1.71.0 --without-python -j 4 stage release
+	./b2 --prefix=${HOME}/boost-build-1.71.0 --without-python -j 2 stage release
 	./b2 --prefix=${HOME}/boost-build-1.71.0 --without-python install
 }
 
@@ -205,11 +200,11 @@ function build_rocksdb() {
 	cmake -DCMAKE_BUILD_TYPE=Release -DWITH_TESTS=OFF -DCMAKE_INSTALL_PREFIX=/usr/local ..
 	make
 	sudo make install
-	#echo "Ar viskas gerai?"
-	#read ANYKEY
+	echo "Ar viskas gerai?"
+	read ANYKEY
 }
 
-function build_catapult_f5() {
+function build_catapult() {
 	clear
 	echo ""
 	echo "*-------------------------------------------------------------*"
@@ -218,7 +213,7 @@ function build_catapult_f5() {
 	read DOINSTALL
 	if [[ $DOINSTALL =~ "y" ]] || [[ $DOINSTALL =~ "Y" ]] ; then
 		sudo apt update
-		#build_catapult_server_9_3_2
+		build_catapult_server_9_3_2
 		#build_catapult_superhow_9_3_2
 	fi
 }
@@ -232,7 +227,7 @@ function build_catapult_superhow_9_3_2() {
 	#mkdir _build && cd _build
 	cmake -DBOOST_ROOT=~/boost-build-1.71.0 -DCMAKE_BUILD_TYPE=Release -G Ninja ..
 	ninja publish
-	ninja -j4
+	ninja -j 2
 	echo "Ar viskas gerai?"
 	read ANYKEY
 }
@@ -241,17 +236,18 @@ function build_catapult_server_9_3_2() {
 	# CATAPULT server
 	cd && git clone https://github.com/nemtech/catapult-server.git
 	cd catapult-server
+	git checkout v0.9.3.2
 	export HASHING_FUNCTION=sha3
 	#mkdir build && cd build # replacing _build to build. for future scripts
 	mkdir _build && cd _build
 	cmake -DBOOST_ROOT=~/boost-build-1.71.0 -DCMAKE_BUILD_TYPE=Release -G Ninja ..
 	ninja publish
-	ninja -j4
+	ninja -j 2
 	echo "Ar viskas gerai?"
 	read ANYKEY
 }
 
-function install_mijin() {
+function install_rest() {
 	clear
 	echo ""
 	echo "*----------------------------------------------------------------*"
@@ -264,7 +260,7 @@ function install_mijin() {
 		install_node_js
 		echo "Ar viskas gerai?"
 		read ANYKEY
-		install_rest
+		install_catapult_rest
 	fi
 }
 
@@ -289,7 +285,7 @@ function install_node_js() {
 	sudo apt install -y yarn
 }
 
-function install_rest() {
+function install_catapult_rest() {
 	# Install REST API
 	cd && git clone https://github.com/nemtech/catapult-rest.git
 	cd catapult-rest
@@ -429,16 +425,16 @@ do
 	echo "*********************************"
 
 	if [[ $DOACTION == "1" ]] ; then
-		build_all_dependancies
-	fi
-	if [[ $DOACTION == "2" ]] ; then
-		install_mijin
+		build_dependancies
 	fi
 	if [[ $DOACTION == "3" ]] ; then
-		init_seed
+		install_rest
 	fi
 	if [[ $DOACTION == "4" ]] ; then
-		build_catapult_f1
+		init_seed
+	fi
+	if [[ $DOACTION == "2" ]] ; then
+		build_catapult
 	fi
 	if [[ $DOACTION == "9" ]] ; then
 		do_firewall_and_ssh
