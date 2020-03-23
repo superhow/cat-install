@@ -1,5 +1,5 @@
 #/bin/bash
-SCRIPT_VER=0.5
+SCRIPT_VER=1.0
 SSH_PORT=22
 CAT_VER=0.9.3.2
 cd
@@ -33,11 +33,11 @@ function print_menu() {
 	echo "*       - gcc 9.2"
 	echo "*       - ninja-build"
 	echo "**"
-	echo "*=============================================================*"
-	echo "|    Script version: v${SCRIPT_VER}"
-	echo "|    Crafted with love by: ministras, linas and bruce_wayne"
-	echo "|    2020 (C) https://SUPERHOW.io"
-	echo "*=============================================================*"
+	echo "*===================================================+==========*"
+	echo "|    Script version: v${SCRIPT_VER}                            |"
+	echo "|    Crafted with love by: ministras, linas and bruce_wayne     |"
+	echo "|    2020 (C) https://SUPERHOW.io                               |"
+	echo "*=======================================+======================*"
 	os_version_check
 	echo "*=============================================================*"
 	echo "| MENU:                                                       |"
@@ -46,7 +46,7 @@ function print_menu() {
 	echo "|  2) Step 2: Build Symbol mijin CATAPULT F5 from git         |"
 	echo "|  3) Step 3: Install MONGO.DB, NODE.JS and CATAPULT REST     |"
 	echo "|  4) Step 4: Generate keys and instialize CATAPULT seed      |"
-	echo "|  5) Tool: TBD                                               |"
+	echo "|  5) Tool: Build rocksDB 6.6.4-nem only                      |"
 	echo "|  9) Setup Firewall and change SSH port (TODO)               |"
 	echo "|  0) Tool: Just do system update & upgrade                   |"	
 	echo "|                                                             |"
@@ -91,8 +91,8 @@ function build_dependancies() {
 		build_mongocxx
 		build_zmq
 		build_rocksdb
-		# echo "Ar viskas gerai?"
-		# read ANYKEY
+		echo "Ar viskas gerai?"
+		read ANYKEY
 		#build_catapult_server_9_3_2
 	fi
 }
@@ -427,14 +427,17 @@ do
 	if [[ $DOACTION == "1" ]] ; then
 		build_dependancies
 	fi
+	if [[ $DOACTION == "2" ]] ; then
+		build_catapult
+	fi
 	if [[ $DOACTION == "3" ]] ; then
 		install_rest
 	fi
 	if [[ $DOACTION == "4" ]] ; then
 		init_seed
 	fi
-	if [[ $DOACTION == "2" ]] ; then
-		build_catapult
+	if [[ $DOACTION == "5" ]] ; then
+		build_rocksdb
 	fi
 	if [[ $DOACTION == "9" ]] ; then
 		do_firewall_and_ssh
