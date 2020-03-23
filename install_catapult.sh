@@ -1,5 +1,5 @@
 #/bin/bash
-SCRIPT_VER=1.A
+SCRIPT_VER=1.B
 SSH_PORT=22
 CAT_VER=0.9.3.2
 cd
@@ -82,6 +82,7 @@ function build_dependancies() {
 		# firewall_setup
 		do_system_update
 		install_dependancies
+		install_cmake
 		build_boost
 		# echo "Ar viskas gerai?"
 		# read ANYKEY
@@ -91,8 +92,8 @@ function build_dependancies() {
 		build_mongocxx
 		build_zmq
 		build_rocksdb
-		echo "Ar viskas gerai?"
-		read ANYKEY
+		#echo "Ar viskas gerai?"
+		#read ANYKEY
 		#build_catapult_server_9_3_2
 	fi
 }
@@ -109,6 +110,19 @@ function install_dependancies() {
 	sudo apt update
 	sudo apt install -y autoconf automake build-essential curl cmake git gcc g++ gdb mc ninja-build pkg-config python3 python3-ply python-dev software-properties-common
 	sudo apt install -y libtool libssl-dev libatomic-ops-dev libunwind-dev libgflags-dev libsnappy-dev libxml2-dev libxslt-dev screen zsh xz-utils
+}
+
+function install_cmake() {
+	# CMAKE v3.15.4
+    cmake_version=3.15.4
+    echo "Installing Cmake ${cmake_version}"
+    echo
+    curl -o cmake-${cmake_version}.tar.gz -SL https://github.com/Kitware/CMake/releases/download/v${cmake_version}/cmake-${cmake_version}.tar.gz
+    tar -xzf cmake-${cmake_version}.tar.gz
+    cd cmake-${cmake_version}
+    cmake .
+    make
+    sudo make install
 }
 
 function build_boost() {
@@ -196,12 +210,12 @@ function build_rocksdb() {
 	cd && git clone https://github.com/nemtech/rocksdb.git
 	cd rocksdb
 	git checkout v6.6.4-nem
-	mkdir _build && cd _build
-	cmake -DCMAKE_BUILD_TYPE=Release -DWITH_TESTS=OFF . -DCMAKE_INSTALL_PREFIX=/usr/local ..
-	make
-	sudo make install
-	echo "Ar viskas gerai?"
-	read ANYKEY
+	#mkdir _build && cd _build
+	#cmake -DCMAKE_BUILD_TYPE=Release -DWITH_TESTS=OFF . -DCMAKE_INSTALL_PREFIX=/usr/local ..
+	#make
+	sudo make install-shared
+	#echo "All good?"
+	#read ANYKEY
 }
 
 function build_catapult() {
@@ -228,7 +242,7 @@ function build_catapult_superhow_9_3_2() {
 	cmake -DBOOST_ROOT=~/boost-build-1.71.0 -DCMAKE_BUILD_TYPE=Release -G Ninja ..
 	ninja publish
 	ninja -j 2
-	echo "Ar viskas gerai?"
+	echo "All good?"
 	read ANYKEY
 }
 
@@ -243,7 +257,7 @@ function build_catapult_server_9_3_2() {
 	cmake -DBOOST_ROOT=~/boost-build-1.71.0 -DCMAKE_BUILD_TYPE=Release -G Ninja ..
 	ninja publish
 	ninja -j 2
-	echo "Ar viskas gerai?"
+	echo "All good?"
 	read ANYKEY
 }
 
@@ -258,7 +272,7 @@ function install_rest() {
 	if [[ $DOINSTALL =~ "y" ]] || [[ $DOINSTALL =~ "Y" ]] ; then
 		install_mongodb
 		install_node_js
-		echo "Ar viskas gerai?"
+		echo "All good?"
 		read ANYKEY
 		install_catapult_rest
 	fi
