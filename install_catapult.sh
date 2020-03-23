@@ -1,5 +1,5 @@
 #/bin/bash
-SCRIPT_VER=1.0
+SCRIPT_VER=1.A
 SSH_PORT=22
 CAT_VER=0.9.3.2
 cd
@@ -197,7 +197,7 @@ function build_rocksdb() {
 	cd rocksdb
 	git checkout v6.6.4-nem
 	mkdir _build && cd _build
-	cmake -DCMAKE_BUILD_TYPE=Release -DWITH_TESTS=OFF -DCMAKE_INSTALL_PREFIX=/usr/local ..
+	cmake -DCMAKE_BUILD_TYPE=Release -DWITH_TESTS=OFF . -DCMAKE_INSTALL_PREFIX=/usr/local ..
 	make
 	sudo make install
 	echo "Ar viskas gerai?"
