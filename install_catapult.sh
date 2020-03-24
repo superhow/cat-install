@@ -1,5 +1,5 @@
 #/bin/bash
-SCRIPT_VER=1.B
+SCRIPT_VER=1.C
 SSH_PORT=22
 CAT_VER=0.9.3.2
 cd
@@ -108,18 +108,26 @@ function do_system_update() {
 
 function install_dependancies() {
 	sudo apt update
-	sudo apt install -y autoconf automake build-essential curl cmake git gcc g++ gdb mc ninja-build pkg-config python3 python3-ply python-dev software-properties-common
+	sudo apt install -y autoconf automake build-essential curl cmake git gcc g++ gdb mc ninja-build pkg-config python3 python3-ply python-dev
 	sudo apt install -y libtool libssl-dev libatomic-ops-dev libunwind-dev libgflags-dev libsnappy-dev libxml2-dev libxslt-dev screen zsh xz-utils
+	#Install new version of GCC v9.2: https://linuxize.com/post/how-to-install-gcc-compiler-on-ubuntu-18-04/
+	sudo apt install -y software-properties-common
+	sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+	sudo apt install -y gcc-9 g++-9
+	#register priority default GCC versions
+	sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 90 --slave /usr/bin/g++ g++ /usr/bin/g++-9 --slave /usr/bin/gcov gcov /usr/bin/gcov-9
+	#to fall back to native GCC: 
+	#sudo update-alternatives --config gcc
 }
 
 function install_cmake() {
 	# CMAKE v3.15.4
-    cmake_version=3.15.4
-    echo "Installing Cmake ${cmake_version}"
+    cmake_ver=3.17.0
+    echo "Installing Cmake ${cmake_ver}"
     echo
-    curl -o cmake-${cmake_version}.tar.gz -SL https://github.com/Kitware/CMake/releases/download/v${cmake_version}/cmake-${cmake_version}.tar.gz
-    tar -xzf cmake-${cmake_version}.tar.gz
-    cd cmake-${cmake_version}
+    curl -o cmake-${cmake_vers}.tar.gz -SL https://github.com/Kitware/CMake/releases/download/v${cmake_ver}/cmake-${cmake_ver}.tar.gz
+    tar -xzf cmake-${cmake_ver}.tar.gz
+    cd cmake-${cmake_ver}
     cmake .
     make
     sudo make install
