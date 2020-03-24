@@ -64,8 +64,9 @@ function install_cmake {
     ./bootstrap
     make -j$(nproc)
     sudo make install
-
-    cmake --version
+    
+    echo "Check CMAKE version:"
+    cd && cmake --version
     rm -rf cmake-$version/
 }
 
