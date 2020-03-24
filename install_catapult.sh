@@ -125,7 +125,7 @@ function install_cmake() {
     cmake_ver=3.17.0
     echo "Installing Cmake ${cmake_ver}"
     echo
-    curl -o cmake-${cmake_vers}.tar.gz -SL https://github.com/Kitware/CMake/releases/download/v${cmake_ver}/cmake-${cmake_ver}.tar.gz
+    curl -o cmake-${cmake_ver}.tar.gz -SL https://github.com/Kitware/CMake/releases/download/v${cmake_ver}/cmake-${cmake_ver}.tar.gz
     tar -xzf cmake-${cmake_ver}.tar.gz
     cd cmake-${cmake_ver}
     cmake .
