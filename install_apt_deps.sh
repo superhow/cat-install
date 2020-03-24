@@ -81,7 +81,7 @@ declare -a install_function=(
 
 for install in "${install_function[@]}"
 do
-    pushd ${home_dir} > /dev/null
+    pushd ${home_dir} > ${home_dir}/apt_install.log 2>&1
     ${install}
-    popd > /dev/null
+    popd > ${home_dir}/apt_install.log 2>&1
 done
