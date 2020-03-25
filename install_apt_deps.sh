@@ -1,6 +1,8 @@
 #!/bin/bash
 # Install apt dependancies unatended script version v3.0
 
+script_ver=3.0
+cat_ver=0.9.3.2
 home_dir=${HOME}
 cd
 
@@ -41,7 +43,8 @@ function install_gcc {
     echo
 
 	sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-	sudo apt install -y gcc-${gcc_version} g++-${gcc_version}
+    sudo add-apt-repository -y ppa:deadsnakes/ppa
+	sudo apt install -y gcc-${gcc_version} g++-${gcc_version} python3.7
 
 	#register priority default GCC versions
 	sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 90 --slave /usr/bin/g++ g++ /usr/bin/g++-9 --slave /usr/bin/gcov gcov /usr/bin/gcov-9
@@ -64,9 +67,10 @@ function install_cmake {
     ./bootstrap
     make -j$(nproc)
     sudo make install
-    
+
     echo "Check CMAKE version:"
     cd && cmake --version
+    python3 --version
     rm -rf cmake-$version/
 }
 
