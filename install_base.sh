@@ -5,7 +5,7 @@
 script_ver=3.0
 cat_ver=0.9.3.2
 home_dir=${HOME}
-exec 2>&1 | tee ${home_dir}/install_base_$(date '+%Y%m%d_%H%M%S').log
+# exec 2>&1 | tee ${home_dir}/install_base_$(date '+%Y%m%d_%H%M%S').log
 # exec > ${home_dir}/install_base_$(date '+%Y%m%d_%H%M%S').log 2>&1
 
 cd
@@ -14,9 +14,9 @@ function apt_upgrade {
     echo
     echo "Upgrade apt dependencies:"
     echo
-    sudo apt update
-    sudo apt upgrade -y
-    sudo apt autoremove -y
+    sudo apt-get update
+    sudo apt-get --yes upgrade
+    sudo apt-get --yes autoremove
 }
 
 function apt_install {
@@ -24,7 +24,7 @@ function apt_install {
     echo "Install apt dependencies:"
     echo ${apt_deps[@]}
     echo
-    sudo apt install -y ${apt_deps[@]}
+    sudo apt-get --yes install ${apt_deps[@]}
 }
 
 function install_apt_deps {
@@ -48,8 +48,8 @@ function install_gcc {
 
     sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
     sudo add-apt-repository -y ppa:deadsnakes/ppa
-    sudo apt install -y gcc-${gcc_version} g++-${gcc_version} python3.7
-    sudo apt autoremove
+    sudo apt-get --yes install gcc-${gcc_version} g++-${gcc_version} python3.7
+    sudo apt-get --yes autoremove
 
     #register priority default GCC versions
     sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 90 --slave /usr/bin/g++ g++ /usr/bin/g++-9 --slave /usr/bin/gcov gcov /usr/bin/gcov-9
@@ -63,7 +63,7 @@ function install_cmake {
     local version=3.17.0
     echo "Installing CMAKE ${cmake_version}"
     echo
-    sudo apt purge -y --auto-remove cmake
+    sudo apt-get --yes --auto-remove purge cmake
 
     wget https://github.com/Kitware/CMake/releases/download/v$version/cmake-$version.tar.gz
     tar -xzvf cmake-$version.tar.gz
