@@ -1,5 +1,8 @@
-#/bin/bash
-SCRIPT_VER=1.C
+#!/bin/bash
+# Install and build Symbol catapult server and dependancies interactive script version v1.0
+# Copyright (c) 2020 superhow, ministras, SUPER HOW UAB licensed under the GNU Lesser General Public License v3
+
+SCRIPT_VER=1.D
 SSH_PORT=22
 CAT_VER=0.9.3.2
 cd
@@ -7,138 +10,134 @@ cd
 # echo "This script is prepared to be executed with user 'root' or any other user"
 
 function print_menu() {
-	#clear
-	echo ""
-	echo ""
-	echo ""
-	echo ""
-	echo ""
-	echo ""
-	echo ""
-	echo ""
-	echo "***************************************************************"
-	echo "*   Symbol CATAPULT install and build script by SUPER HOW?"
-	echo "*   - build and install all Symbol CATAPULT dependancies"
-	echo "*   - build and install Symbol CATAPULT ${CAT_VER}"
-	echo "*   - generate Symbol CATAPULT seed"
-	echo "**"
-	echo "*   Script to be run by limited user, will need sudo rights"
-	echo "*   Prerequisites from github/nemtech	for building on Ubuntu 18.04"
-	echo "*   Instructions are for gcc, but compiles with clang 9 as well"
-	echo "**"
-	echo "*       - OpenSSL dev library, at least 1.1.1 (libssl-dev)"
-	echo "*       - cmake (at least 3.14)"
-	echo "*       - git"
-	echo "*       - python 3.x"
-	echo "*       - gcc 9.2"
-	echo "*       - ninja-build"
-	echo "**"
-	echo "*===================================================+==========*"
-	echo "|    Script version: v${SCRIPT_VER}                            |"
-	echo "|    Crafted with love by: ministras, linas and bruce_wayne     |"
-	echo "|    2020 (C) https://SUPERHOW.io                               |"
-	echo "*=======================================+======================*"
-	os_version_check
-	echo "*=============================================================*"
-	echo "| MENU:                                                       |"
-	echo "|                                                             |"
-	echo "|  1) Step 1: Build all dependencies for CATAPULT F5          |"
-	echo "|  2) Step 2: Build Symbol mijin CATAPULT F5 from git         |"
-	echo "|  3) Step 3: Install MONGO.DB, NODE.JS and CATAPULT REST     |"
-	echo "|  4) Step 4: Generate keys and instialize CATAPULT seed      |"
-	echo "|  5) Tool: Build rocksDB 6.6.4-nem only                      |"
-	echo "|  9) Setup Firewall and change SSH port (TODO)               |"
-	echo "|  0) Tool: Just do system update & upgrade                   |"	
-	echo "|                                                             |"
-	echo "|  80) Hostname                                               |" 
-	echo "|  91) Reboot                                                 |"
-	echo "|  92) Shutdown                                               |"
-	echo "|  100) Print menu                                            |"
-	echo "|                                                             |"
-	echo "|  q) Quit                                                    |"
-	echo "*=============================================================*"
+    #clear
+    echo
+    echo
+    echo
+    echo
+    echo "***************************************************************"
+    echo "*   Symbol CATAPULT install and build script by SUPER HOW?"
+    echo "*   - build and install all Symbol CATAPULT dependancies"
+    echo "*   - build and install Symbol CATAPULT ${CAT_VER}"
+    echo "*   - generate Symbol CATAPULT seed"
+    echo "**"
+    echo "*   Script to be run by limited user, will need sudo rights"
+    echo "*   Prerequisites from github/nemtech	for building on Ubuntu 18.04"
+    echo "*   Instructions are for gcc, but compiles with clang 9 as well"
+    echo "**"
+    echo "*       - OpenSSL dev library, at least 1.1.1 (libssl-dev)"
+    echo "*       - cmake (at least 3.14)"
+    echo "*       - git"
+    echo "*       - python 3.x"
+    echo "*       - gcc 9.2"
+    echo "*       - ninja-build"
+    echo "**"
+    echo "*===================================================+==========*"
+    echo "|    Script version: v${SCRIPT_VER}                            |"
+    echo "|    Crafted with love by: ministras, linas and bruce_wayne     |"
+    echo "|    2020 (C) https://SUPERHOW.io                               |"
+    echo "*=======================================+======================*"
+    os_version_check
+    echo "*=============================================================*"
+    echo "| MENU:                                                       |"
+    echo "|                                                             |"
+    echo "|  1) Step 1: Build all dependencies for CATAPULT F5          |"
+    echo "|  2) Step 2: Build Symbol mijin CATAPULT F5 from git         |"
+    echo "|  3) Step 3: Install MONGO.DB, NODE.JS and CATAPULT REST     |"
+    echo "|  4) Step 4: Generate keys and instialize CATAPULT seed      |"
+    echo "|  5) Tool: Build rocksDB 6.6.4-nem only                      |"
+    echo "|  9) Setup Firewall and change SSH port (TODO)               |"
+    echo "|  0) Tool: Just do system update & upgrade                   |"	
+    echo "|                                                             |"
+    echo "|  80) Hostname                                               |" 
+    echo "|  91) Reboot                                                 |"
+    echo "|  92) Shutdown                                               |"
+    echo "|  100) Print menu                                            |"
+    echo "|                                                             |"
+    echo "|  q) Quit                                                    |"
+    echo "*=============================================================*"
 }
 
 function os_version_check() {
-	if [[ -r /etc/os-release ]]; then
-    	. /etc/os-release
-		# echo -e "Version ${VERSION_ID}"
-		echo -e "OS & Version: ${PRETTY_NAME}"
-		if [[ "${VERSION_ID}" != "16.04" ]] && [[ "${VERSION_ID}" != "18.04" ]] ; then
-			echo "WARNING: Script is compatible with ONLY Ubuntu 16.04 or Ubuntu 18.04"
-		fi
-	fi
+    if [[ -r /etc/os-release ]]; then
+        . /etc/os-release
+        # echo -e "Version ${VERSION_ID}"
+        echo -e "OS & Version: ${PRETTY_NAME}"
+        if [[ "${VERSION_ID}" != "16.04" ]] && [[ "${VERSION_ID}" != "18.04" ]] ; then
+            echo "WARNING: Script is compatible with ONLY Ubuntu 16.04 or Ubuntu 18.04"
+        fi
+    fi
 }
 
 function build_dependancies() {
-	clear
-	echo "*---------------------------------------------------------*"
-	echo "| UPDATE system, install DEPENDANCIES, build TOOLS? [y/n] |"
-	echo "| mijin CATAPULT version: ${CAT_VER}                      |"
-	echo "*---------------------------------------------------------*"
-	read DOINSTALL
-	if [[ $DOINSTALL =~ "y" ]] || [[ $DOINSTALL =~ "Y" ]] ; then
-		# change_ssh_port
-		# firewall_setup
-		do_system_update
-	# laikinai install_dependancies
-	# laikinai install_cmake
-		build_boost
-		# echo "Ar viskas gerai?"
-		# read ANYKEY
-		build_gtest
-		build_benchmark
-		build_mongoc
-		build_mongocxx
-		build_zmq
-		build_rocksdb
-		#echo "Ar viskas gerai?"
-		#read ANYKEY
-		#build_catapult_server_9_3_2
-	fi
+    clear
+    echo "*---------------------------------------------------------*"
+    echo "| UPDATE system, install DEPENDANCIES, build TOOLS? [y/n] |"
+    echo "| mijin CATAPULT version: ${CAT_VER}                      |"
+    echo "*---------------------------------------------------------*"
+    read DOINSTALL
+    if [[ $DOINSTALL =~ "y" ]] || [[ $DOINSTALL =~ "Y" ]] ; then
+        # change_ssh_port
+        # firewall_setup
+        do_system_update
+        install_dependancies
+        install_cmake
+        build_boost
+        # echo "Ar viskas gerai?"
+        # read ANYKEY
+        build_gtest
+        build_benchmark
+        build_mongoc
+        build_mongocxx
+        build_zmq
+        build_rocksdb
+        #echo "Ar viskas gerai?"
+        #read ANYKEY
+        build_catapult_server_9_3_2
+    fi
 }
 
 function do_system_update() {
-	sudo apt-get update
-	sudo apt-get --yes upgrade
-	sudo apt-get --yes autoremove
-	ulimit -n 4096
-	#sudo apt-get -y --fix-missing upgrade  # kai neranda tam tikrų paketų 
-	#sudo apt-get -y dist-upgrade 
+    sudo apt-get update
+    sudo apt-get --yes upgrade
+    sudo apt-get --yes autoremove
+    ulimit -n 4096
+    #sudo apt-get -y --fix-missing upgrade  # kai neranda tam tikrų paketų 
+    #sudo apt-get -y dist-upgrade 
 }
 
 function install_dependancies() {
-	sudo apt-get --yes install autoconf automake build-essential curl cmake git gcc g++ gdb mc ninja-build pkg-config python3 python3-ply python-dev
-	sudo apt-get --yes install libtool libssl-dev libatomic-ops-dev libunwind-dev libgflags-dev libsnappy-dev libxml2-dev libxslt-dev screen zsh xz-utils
-	#Install new version of GCC v9.2: https://linuxize.com/post/how-to-install-gcc-compiler-on-ubuntu-18-04/
-	sudo apt-get --yes install software-properties-common
-	sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
-	sudo add-apt-repository --yes ppa:deadsnakes/ppa
-	sudo apt-get --yes install gcc-9 g++-9 python3.7
-	sudo apt-get --yes autoremove
-	#register priority default GCC versions
-	sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 90 --slave /usr/bin/g++ g++ /usr/bin/g++-9 --slave /usr/bin/gcov gcov /usr/bin/gcov-9
-	#to fall back to native GCC: 
-	#sudo update-alternatives --config gcc
+    sudo apt-get --yes install autoconf automake build-essential curl cmake git gcc g++ gdb mc ninja-build pkg-config python3 python3-ply python-dev
+    sudo apt-get --yes install libtool libssl-dev libatomic-ops-dev libunwind-dev libgflags-dev libsnappy-dev libxml2-dev libxslt-dev screen zsh xz-utils
+    #Install new version of GCC v9.2: https://linuxize.com/post/how-to-install-gcc-compiler-on-ubuntu-18-04/
+    sudo apt-get --yes install software-properties-common
+    sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
+    sudo add-apt-repository --yes ppa:deadsnakes/ppa
+    sudo apt-get --yes install gcc-9 g++-9 python3.7
+    sudo apt-get --yes autoremove
+    #register priority default GCC versions
+    sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 90 --slave /usr/bin/g++ g++ /usr/bin/g++-9 --slave /usr/bin/gcov gcov /usr/bin/gcov-9
+    #to fall back to native GCC: 
+    #sudo update-alternatives --config gcc
 }
 
 function install_cmake() {
-	# CMAKE v3.15.4
+    # CMAKE v3.15.4 or v3.17.0
     cmake_ver=3.17.0
-	echo
+    echo
     echo "Installing Cmake ${cmake_ver}"
     echo
-	sudo apt-get --yes --auto-remove purge cmake
-	wget https://github.com/Kitware/CMake/releases/download/v${cmake_ver}/cmake-${cmake_ver}.tar.gz
-	tar -xzvf cmake-${cmake_ver}.tar.gz
-	rm cmake-${cmake_ver}.tar.gz
-	cd cmake-${cmake_ver}/
-	./bootstrap
-	make -j $(nproc)
-	sudo make install
-	echo
-	echo "Check CMAKE version:"
-	echo
+    sudo apt-get --yes --auto-remove purge cmake
+    wget https://github.com/Kitware/CMake/releases/download/v${cmake_ver}/cmake-${cmake_ver}.tar.gz
+    tar -xzvf cmake-${cmake_ver}.tar.gz
+    rm cmake-${cmake_ver}.tar.gz
+    cd cmake-${cmake_ver}/
+    ./bootstrap
+    make -j $(nproc)
+    sudo make install
+    echo
+    echo "Check CMAKE version:"
+    echo
     cd && cmake --version
     python3 --version
     gcc --version
@@ -146,16 +145,21 @@ function install_cmake() {
 }
 
 function build_boost() {
-	# Boost - c++
-	cd && curl -o boost_1_72_0.tar.gz -SL https://dl.bintray.com/boostorg/release/1.72.0/source/boost_1_72_0.tar.gz
-	tar -xzf boost_1_72_0.tar.gz
-	rm boost_1_72_0.tar.gz
+	# Boost - c++ v1.71.0 or v1.72.0
+    boost_v=1_72_0
+	boost_ver=1.72.0
+	echo
+    echo "Installing Cmake ${boost_ver}"
+    echo
+	cd && curl -o boost_${boost_v}.tar.gz -SL https://dl.bintray.com/boostorg/release/${boost_ver}/source/boost_${boost_v}.tar.gz
+	tar -xzf boost_${boost_v}.tar.gz
+	rm boost_${boost_v}.tar.gz
 	## WARNING: below use $HOME rather than ~ - boost scripts might treat it literally
-	mkdir boost-build-1.72.0
-	cd boost_1_72_0
-	./bootstrap.sh --prefix=${HOME}/boost-build-1.72.0
-	./b2 --prefix=${HOME}/boost-build-1.72.0 --without-python -j $(nproc) stage release
-	./b2 --prefix=${HOME}/boost-build-1.72.0 --without-python install
+	mkdir boost-build
+	cd boost_${boost_v}
+	./bootstrap.sh --prefix=${HOME}/boost-build
+	./b2 --prefix=${HOME}/boost-build --without-python -j $(nproc) stage release
+	./b2 --prefix=${HOME}/boost-build --without-python install
 }
 
 function build_gtest() {
@@ -240,13 +244,13 @@ function build_rocksdb() {
 
 function build_catapult() {
 	clear
-	echo ""
+	echo
 	echo "*-------------------------------------------------------------*"
 	echo "|   Build catapult server ${CAT_VER} from SUPER HOW git? [y/n]|"
 	echo "*-------------------------------------------------------------*"
 	read DOINSTALL
 	if [[ $DOINSTALL =~ "y" ]] || [[ $DOINSTALL =~ "Y" ]] ; then
-		sudo apt update
+		sudo apt-get update
 		build_catapult_server_9_3_2
 		#build_catapult_superhow_9_3_2
 	fi
@@ -259,9 +263,9 @@ function build_catapult_superhow_9_3_2() {
 	export HASHING_FUNCTION=sha3
 	mkdir build && cd build # replacing _build to build. for future scripts
 	#mkdir _build && cd _build
-	cmake -DBOOST_ROOT=~/boost-build-1.71.0 -DCMAKE_BUILD_TYPE=Release -G Ninja ..
+	cmake -DBOOST_ROOT=~/boost-build -DCMAKE_BUILD_TYPE=Release -G Ninja ..
 	ninja publish
-	ninja -j 2
+	ninja -j $(nproc)
 	echo "All good?"
 	read ANYKEY
 }
@@ -274,9 +278,9 @@ function build_catapult_server_9_3_2() {
 	export HASHING_FUNCTION=sha3
 	#mkdir build && cd build # replacing _build to build. for future scripts
 	mkdir _build && cd _build
-	cmake -DBOOST_ROOT=~/boost-build-1.71.0 -DCMAKE_BUILD_TYPE=Release -G Ninja ..
+	cmake -DBOOST_ROOT=~/boost-build -DCMAKE_BUILD_TYPE=Release -G Ninja ..
 	ninja publish
-	ninja -j 2
+	ninja -j $(nproc)
 	echo "All good?"
 	read ANYKEY
 }
