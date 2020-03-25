@@ -42,9 +42,9 @@ function install_gcc {
     echo "Install GCC ${gcc_version}"
     echo
 
-	sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+    sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
     sudo add-apt-repository -y ppa:deadsnakes/ppa
-	sudo apt install -y gcc-${gcc_version} g++-${gcc_version} python3.7
+    sudo apt install -y gcc-${gcc_version} g++-${gcc_version} python3.7
 
 	#register priority default GCC versions
 	sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 90 --slave /usr/bin/g++ g++ /usr/bin/g++-9 --slave /usr/bin/gcov gcov /usr/bin/gcov-9
