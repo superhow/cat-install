@@ -73,6 +73,7 @@ function install_cmake {
     echo "Check CMAKE version:"
     cd && cmake --version
     python3 --version
+    gcc --version
     rm -rf cmake-$version/
 }
 
