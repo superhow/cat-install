@@ -5,6 +5,9 @@
 script_ver=3.0
 cat_ver=0.9.3.2
 home_dir=${HOME}
+exec 2>&1 | tee ${home_dir}/install_base_$(date '+%Y%m%d_%H%M%S').log
+# exec > ${home_dir}/install_base_$(date '+%Y%m%d_%H%M%S').log 2>&1
+
 cd
 
 function apt_upgrade {
