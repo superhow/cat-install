@@ -81,8 +81,8 @@ function build_dependancies() {
 		# change_ssh_port
 		# firewall_setup
 		do_system_update
-		install_dependancies
-		install_cmake
+	# laikinai install_dependancies
+	# laikinai install_cmake
 		build_boost
 		# echo "Ar viskas gerai?"
 		# read ANYKEY
@@ -99,21 +99,23 @@ function build_dependancies() {
 }
 
 function do_system_update() {
-	sudo apt update
-	sudo apt -y upgrade
+	sudo apt-get update
+	sudo apt-get --yes upgrade
+	sudo apt-get --yes autoremove
 	ulimit -n 4096
 	#sudo apt-get -y --fix-missing upgrade  # kai neranda tam tikrų paketų 
 	#sudo apt-get -y dist-upgrade 
 }
 
 function install_dependancies() {
-	sudo apt update
-	sudo apt install -y autoconf automake build-essential curl cmake git gcc g++ gdb mc ninja-build pkg-config python3 python3-ply python-dev
-	sudo apt install -y libtool libssl-dev libatomic-ops-dev libunwind-dev libgflags-dev libsnappy-dev libxml2-dev libxslt-dev screen zsh xz-utils
+	sudo apt-get --yes install autoconf automake build-essential curl cmake git gcc g++ gdb mc ninja-build pkg-config python3 python3-ply python-dev
+	sudo apt-get --yes install libtool libssl-dev libatomic-ops-dev libunwind-dev libgflags-dev libsnappy-dev libxml2-dev libxslt-dev screen zsh xz-utils
 	#Install new version of GCC v9.2: https://linuxize.com/post/how-to-install-gcc-compiler-on-ubuntu-18-04/
-	sudo apt install -y software-properties-common
-	sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-	sudo apt install -y gcc-9 g++-9
+	sudo apt-get --yes install software-properties-common
+	sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
+	sudo add-apt-repository --yes ppa:deadsnakes/ppa
+	sudo apt-get --yes install gcc-9 g++-9 python3.7
+	sudo apt-get --yes autoremove
 	#register priority default GCC versions
 	sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 90 --slave /usr/bin/g++ g++ /usr/bin/g++-9 --slave /usr/bin/gcov gcov /usr/bin/gcov-9
 	#to fall back to native GCC: 
@@ -123,27 +125,37 @@ function install_dependancies() {
 function install_cmake() {
 	# CMAKE v3.15.4
     cmake_ver=3.17.0
+	echo
     echo "Installing Cmake ${cmake_ver}"
     echo
-    curl -o cmake-${cmake_ver}.tar.gz -SL https://github.com/Kitware/CMake/releases/download/v${cmake_ver}/cmake-${cmake_ver}.tar.gz
-    tar -xzf cmake-${cmake_ver}.tar.gz
-    cd cmake-${cmake_ver}
-    cmake .
-    make
-    sudo make install
+	sudo apt-get --yes --auto-remove purge cmake
+	wget https://github.com/Kitware/CMake/releases/download/v${cmake_ver}/cmake-${cmake_ver}.tar.gz
+	tar -xzvf cmake-${cmake_ver}.tar.gz
+	rm cmake-${cmake_ver}.tar.gz
+	cd cmake-${cmake_ver}/
+	./bootstrap
+	make -j $(nproc)
+	sudo make install
+	echo
+	echo "Check CMAKE version:"
+	echo
+    cd && cmake --version
+    python3 --version
+    gcc --version
+    rm -rf cmake-${cmake_ver}/
 }
 
 function build_boost() {
 	# Boost - c++
-	cd && curl -o boost_1_71_0.tar.gz -SL https://dl.bintray.com/boostorg/release/1.71.0/source/boost_1_71_0.tar.gz
-	tar -xzf boost_1_71_0.tar.gz
-	rm boost_1_71_0.tar.gz
+	cd && curl -o boost_1_72_0.tar.gz -SL https://dl.bintray.com/boostorg/release/1.72.0/source/boost_1_72_0.tar.gz
+	tar -xzf boost_1_72_0.tar.gz
+	rm boost_1_72_0.tar.gz
 	## WARNING: below use $HOME rather than ~ - boost scripts might treat it literally
-	mkdir boost-build-1.71.0
-	cd boost_1_71_0
-	./bootstrap.sh --prefix=${HOME}/boost-build-1.71.0
-	./b2 --prefix=${HOME}/boost-build-1.71.0 --without-python -j 2 stage release
-	./b2 --prefix=${HOME}/boost-build-1.71.0 --without-python install
+	mkdir boost-build-1.72.0
+	cd boost_1_72_0
+	./bootstrap.sh --prefix=${HOME}/boost-build-1.72.0
+	./b2 --prefix=${HOME}/boost-build-1.72.0 --without-python -j $(nproc) stage release
+	./b2 --prefix=${HOME}/boost-build-1.72.0 --without-python install
 }
 
 function build_gtest() {
