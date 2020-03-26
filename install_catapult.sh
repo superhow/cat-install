@@ -38,24 +38,24 @@ function print_menu() {
     echo "|    2020 (C) https://SUPERHOW.io                               |"
     echo "*=======================================+======================*"
     os_version_check
-    echo "*=============================================================*"
-    echo "| MENU:                                                       |"
-    echo "|                                                             |"
-    echo "|  1) Step 1: Build all dependencies for CATAPULT F5          |"
-    echo "|  2) Step 2: Build Symbol mijin CATAPULT F5 from git         |"
-    echo "|  3) Step 3: Install MONGO.DB, NODE.JS and CATAPULT REST     |"
-    echo "|  4) Step 4: Generate keys and instialize CATAPULT seed      |"
-    echo "|  5) Tool: Build rocksDB 6.6.4-nem only                      |"
-    echo "|  9) Setup Firewall and change SSH port (TODO)               |"
-    echo "|  0) Tool: Just do system update & upgrade                   |"	
-    echo "|                                                             |"
-    echo "|  80) Hostname                                               |" 
-    echo "|  91) Reboot                                                 |"
-    echo "|  92) Shutdown                                               |"
-    echo "|  100) Print menu                                            |"
-    echo "|                                                             |"
-    echo "|  q) Quit                                                    |"
-    echo "*=============================================================*"
+    echo "*==============================================================*"
+    echo "| MENU:                                                        |"
+    echo "|                                                              |"
+    echo "|  1) Step 1: Build BASE system dependencies i.e. Cmake, Boost |"
+    echo "|  2) Step 2: Build CATAPULT dependencies i.e. drivers, rocksdb|"
+    echo "|  3) Step 3: Build Symbol mijin CATAPULT F5 from git          |"
+    echo "|  4) Step 4: Build MONGO.DB, NODE.JS and CATAPULT REST        |"
+    echo "|  5) Step 5: Generate keys and instialize CATAPULT seed       |"
+    echo "|  9) Setup Firewall and change SSH port (TODO)                |"
+    echo "|  0) Tool: Just do system update & upgrade                    |"	
+    echo "|                                                              |"
+    echo "|  80) Hostname                                                |" 
+    echo "|  91) Reboot                                                  |"
+    echo "|  92) Shutdown                                                |"
+    echo "|  100) Print menu                                             |"
+    echo "|                                                              |"
+    echo "|  q) Quit                                                     |"
+    echo "*==============================================================*"
 }
 
 function os_version_check() {
@@ -69,11 +69,11 @@ function os_version_check() {
     fi
 }
 
-function build_dependancies() {
+function build_base() {
     clear
     echo "*---------------------------------------------------------*"
-    echo "| UPDATE system, install DEPENDANCIES, build TOOLS? [y/n] |"
-    echo "| mijin CATAPULT version: ${CAT_VER}                      |"
+    echo "| UPDATE system, install BASE dependancies? [y/n]         |"
+    echo "| Boot, Cmake for CATAPULT version: ${CAT_VER}            |"
     echo "*---------------------------------------------------------*"
     read DOINSTALL
     if [[ $DOINSTALL =~ "y" ]] || [[ $DOINSTALL =~ "Y" ]] ; then
@@ -82,18 +82,9 @@ function build_dependancies() {
         do_system_update
         install_dependancies
         install_cmake
-        build_boost
+        install_boost
         # echo "Ar viskas gerai?"
         # read ANYKEY
-        build_gtest
-        build_benchmark
-        build_mongoc
-        build_mongocxx
-        build_zmq
-        build_rocksdb
-        #echo "Ar viskas gerai?"
-        #read ANYKEY
-        build_catapult_server_9_3_2
     fi
 }
 
@@ -144,12 +135,12 @@ function install_cmake() {
     rm -rf cmake-${cmake_ver}/
 }
 
-function build_boost() {
+function install_boost() {
 	# Boost - c++ v1.71.0 or v1.72.0
     boost_v=1_72_0
 	boost_ver=1.72.0
 	echo
-    echo "Installing Cmake ${boost_ver}"
+    echo "Installing BOOST ${boost_ver}"
     echo
 	cd && curl -o boost_${boost_v}.tar.gz -SL https://dl.bintray.com/boostorg/release/${boost_ver}/source/boost_${boost_v}.tar.gz
 	tar -xzf boost_${boost_v}.tar.gz
@@ -160,6 +151,27 @@ function build_boost() {
 	./bootstrap.sh --prefix=${HOME}/boost-build
 	./b2 --prefix=${HOME}/boost-build --without-python -j $(nproc) stage release
 	./b2 --prefix=${HOME}/boost-build --without-python install
+}
+
+function build_dependancies() {
+    clear
+    echo "*---------------------------------------------------------*"
+    echo "| Build Catapult DEPENDANCIES, build TOOLS? [y/n]         |"
+    echo "| Tools and drivers for CATAPULT version: ${CAT_VER}      |"
+    echo "*---------------------------------------------------------*"
+    read DOINSTALL
+    if [[ $DOINSTALL =~ "y" ]] || [[ $DOINSTALL =~ "Y" ]] ; then
+        sudo apt-get update
+        build_gtest
+        build_benchmark
+        build_mongoc
+        build_mongocxx
+        build_zmq
+        build_rocksdb
+        #echo "Ar viskas gerai?"
+        #read ANYKEY
+        #build_catapult_server_9_3_2
+    fi
 }
 
 function build_gtest() {
@@ -204,7 +216,8 @@ function build_mongocxx() {
 	#TODO: find out why do we need maxAwaitTimeMS patch...
 	#sed -i 's/kvp("maxAwaitTimeMS", count)/kvp("maxAwaitTimeMS", static_cast<int64_t>(count))/' src/mongocxx/options/change_stream.cpp
 	mkdir _build && cd _build
-	cmake -DCMAKE_CXX_STANDARD=17 -DLIBBSON_DIR=/usr/local -DLIBMONGOC_DIR=/usr/local -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local ..
+	#cmake -DCMAKE_CXX_STANDARD=17 -DLIBBSON_DIR=/usr/local -DLIBMONGOC_DIR=/usr/local -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local ..
+	cmake -DCMAKE_CXX_STANDARD=17 -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local ..
 	make
 	sudo make install
 }
@@ -266,8 +279,8 @@ function build_catapult_superhow_9_3_2() {
 	cmake -DBOOST_ROOT=~/boost-build -DCMAKE_BUILD_TYPE=Release -G Ninja ..
 	ninja publish
 	ninja -j $(nproc)
-	echo "All good?"
-	read ANYKEY
+	#echo "All good?"
+	#read ANYKEY
 }
 
 function build_catapult_server_9_3_2() {
@@ -278,11 +291,11 @@ function build_catapult_server_9_3_2() {
 	export HASHING_FUNCTION=sha3
 	#mkdir build && cd build # replacing _build to build. for future scripts
 	mkdir _build && cd _build
-	cmake -DBOOST_ROOT=~/boost-build -DCMAKE_BUILD_TYPE=Release -G Ninja ..
+	cmake -DBOOST_ROOT=~/boost-build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${HOME}/catapult-server -G Ninja ..
 	ninja publish
 	ninja -j $(nproc)
-	echo "All good?"
-	read ANYKEY
+	#echo "All good?"
+	#read ANYKEY
 }
 
 function install_rest() {
@@ -463,19 +476,19 @@ do
 	echo "*********************************"
 
 	if [[ $DOACTION == "1" ]] ; then
-		build_dependancies
+		build_base
 	fi
 	if [[ $DOACTION == "2" ]] ; then
-		build_catapult
+		build_dependancies
 	fi
 	if [[ $DOACTION == "3" ]] ; then
-		install_rest
+		build_catapult
 	fi
 	if [[ $DOACTION == "4" ]] ; then
-		init_seed
+		install_rest
 	fi
 	if [[ $DOACTION == "5" ]] ; then
-		build_rocksdb
+		init_seed
 	fi
 	if [[ $DOACTION == "9" ]] ; then
 		do_firewall_and_ssh
