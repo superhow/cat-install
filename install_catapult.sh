@@ -2,7 +2,7 @@
 # Install and build Symbol catapult server and dependancies interactive script version v1.0
 # Copyright (c) 2020 superhow, ministras, SUPER HOW UAB licensed under the GNU Lesser General Public License v3
 
-SCRIPT_VER=1.D
+SCRIPT_VER=1.E
 SSH_PORT=22
 CAT_VER=0.9.3.2
 cd
@@ -291,7 +291,7 @@ function build_catapult_server_9_3_2() {
 	export HASHING_FUNCTION=sha3
 	#mkdir build && cd build # replacing _build to build. for future scripts
 	mkdir _build && cd _build
-	cmake -DBOOST_ROOT=~/boost-build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${HOME}/catapult-server -G Ninja ..
+	cmake -DBOOST_ROOT=~/boost-build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${HOME}/catapult -G Ninja ..
 	ninja publish
 	ninja -j $(nproc)
 	#echo "All good?"
@@ -318,8 +318,8 @@ function install_rest() {
 function install_mongodb() {
 	# Install MongoDB. MANDATORY
 	cd
-	sudo apt update
-	sudo apt install -y mongodb
+	sudo apt-get update
+	sudo apt-get --yes install mongodb
 	sudo systemctl start mongodb
 	sudo systemctl enable mongodb
 	sudo systemctl status mongodb
@@ -329,11 +329,11 @@ function install_node_js() {
 	# Install Node.js v10 & yarn for REST API
 	cd
 	curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
-	sudo apt install -y nodejs
+	sudo apt-get --yes install nodejs
 	curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
 	echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
-	sudo apt update
-	sudo apt install -y yarn
+	sudo apt-get update
+	sudo apt-get --yes install yarn
 }
 
 function install_catapult_rest() {
@@ -370,35 +370,31 @@ function generate_accounts() {
 	read ACCOUNT_COUNT
 	# Generate 3 accounts for "nemesis_signer" , "node owner" and "REST owner"!!!
 	# Generate 3 additional accounts for "api owner", peer1 owner" and "peer2 owner"!!!
-	cd ~/catapult-server/build
-	# mkdir catapult-node-data
-	# catapult-node-data && mkdir data && mkdir nemesis && mkdir resources && mkdir scripts && mkdir seed
-	~/catapult-server/build/bin/catapult.tools.address -g ${ACCOUNT_COUNT} --network mijin-test > ~/catapult-server/nemesis_signer.txt
-    cd ~/catapult-server
+	cd ${HOME}/catapult/
+	# mkdir catapult-node
+	# catapult-node && mkdir data && mkdir nemesis && mkdir resources && mkdir scripts && mkdir seed
+	${HOME}/catapult/bin/catapult.tools.address -g ${ACCOUNT_COUNT} --network mijin | tee ${HOME}/catapult/nemesis_signer.txt
+    cd ${HOME}/catapult
     mkdir nemesis && mkdir data && mkdir tmp
 }
 
 function initialize_seed() {
-	cd ~/catapult-server/scripts
-	git clone https://bitbucket.org/superhow/mijin-config-f1.git mijin-config -b itree-beta1
-	cp -r mijin-config/cat-config-linux ./cat-config
-	rm -rf mijin-config
+	cd ${HOME}/catapult/scripts
+	git clone https://bitbucket.org/superhow/cat-config.git
+	#cp -r cat-config/cat-config-linux ./cat-config
+	#rm -rf cat-config
 	
-	# First private and public keys from the file ~/catapult-node-data/nemesis_signer.txt
-	# --local (local node) dual (peer & api in one)
-	cd ~/catapult-server
+	# First private and public keys from the file ~/catapult-node/nemesis_signer.txt --local (local node) --dual (peer & api in one)
+	cd ${HOME}/catapult
 
-	# zsh scripts/cat-config/reset.sh --local dual ~/catapult-server <private_key> <public_key>
+	# zsh scripts/cat-config/reset.sh --local dual ~/catapult-node <private_key> <public_key>
 }
 
-# You need to make changes to the configuration files.
-# folder with configuration files - catapult-server/recources
-# 
-# change the necessary parameters. You can change other parameters for your task.
+# You need to make changes to the configuration files - catapult-node/recources change the necessary parameters.
 #
 # 1.
 # config-harvesting.properties
-#       harvesterPrivateKey = <PRIVATE key of the FIRST address from the file catapult-node-data/harvester_addresses.txt>
+#       harvesterPrivateKey = <PRIVATE key of the FIRST address from the file catapult-node/harvester_addresses.txt>
 # 2.
 # config-node.properties
 #
@@ -409,7 +405,7 @@ function initialize_seed() {
 #       [account]
 #
 #       #keys should look like 3485D98EFD7EB07ADAFCFD1A157D89DE2796A95E780813C0258AF3F5F84ED8CB
-#       bootPrivateKey = <PRIVATE key of the SECOND address from the file catapult-server/harvester_addresses.txt>
+#       bootPrivateKey = <PRIVATE key of the SECOND address from the file catapult-node/harvester_addresses.txt>
 #       shouldAutoDetectDelegatedHarvesters = true
 #
 #       [storage]
@@ -418,28 +414,23 @@ function initialize_seed() {
 #       pluginsDirectory =
 #
 # 4.
-#       "publicKey": <PUBLIC key of the SECOND address from the file catapult-server/harvester_addresses.txt>
+#       "publicKey": <PUBLIC key of the SECOND address from the file catapult-node/harvester_addresses.txt>
 #
 # 5.
 # peer-p2p.json
-#       "publicKey": <PUBLIC key of the SECOND address from the file catapult-server/harvester_addresses.txt>
-
+#       "publicKey": <PUBLIC key of the SECOND address from the file catapult-node/harvester_addresses.txt>
 
 # Configure REST API
 # 1.
 # catapult-rest/rest/resources/rest.json
-#       "clientPrivateKey": <PRIVATE key of the THIRD address from the file catapult-server/harvester_addresses.txt
+#       "clientPrivateKey": <PRIVATE key of the THIRD address from the file catapult-node/harvester_addresses.txt
 #
 #       "apiNode": {
 #           "host": "127.0.0.1",
 #           "port": 7900,
-#           "publicKey": <PUBLIC key of the SECOND address from the file catapult-server/harvester_addresses.txt>,
+#           "publicKey": <PUBLIC key of the SECOND address from the file catapult-node/harvester_addresses.txt>,
 #           "timeout": 1000
 # },
-#
-# ALL READY FOR LAUNCH !!!
-
-
 
 # # === Firewall ===
 # function firewall_setup() {
