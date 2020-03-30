@@ -328,7 +328,7 @@ function install_mongodb() {
 function install_node_js() {
 	# Install Node.js v10 & yarn for REST API
 	cd
-	curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+	curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
 	sudo apt-get --yes install nodejs
 	curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
 	echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
