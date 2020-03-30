@@ -380,9 +380,7 @@ function generate_accounts() {
 
 function initialize_seed() {
 	cd ${HOME}/catapult/scripts
-	git clone https://bitbucket.org/superhow/cat-config.git
-	#cp -r cat-config/cat-config-linux ./cat-config
-	#rm -rf cat-config
+	git clone https://github.com/superhow/cat-config.git
 	
 	# First private and public keys from the file ~/catapult-node/nemesis_signer.txt --local (local node) --dual (peer & api in one)
 	cd ${HOME}/catapult
