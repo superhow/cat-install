@@ -137,20 +137,21 @@ function install_cmake() {
 }
 
 function install_boost() {
-	# Boost - c++ v1.71.0 or v1.72.0
+    # Boost - c++ v1.71.0 or v1.72.0
     boost_v=1_72_0
-	boost_ver=1.72.0
-	echo
+    boost_ver=1.72.0
+    echo
     echo "Installing BOOST ${boost_ver}"
     echo
-	cd && curl -o boost_${boost_v}.tar.gz -SL https://dl.bintray.com/boostorg/release/${boost_ver}/source/boost_${boost_v}.tar.gz
-	tar -xzf boost_${boost_v}.tar.gz
-	rm boost_${boost_v}.tar.gz
-	mkdir /opt/boost
-	cd boost_${boost_v}
-	./bootstrap.sh --prefix=/opt/boost # bootstrapinam i /opt/boost
-	./b2 --prefix=/opt/boost --without-python -j $(nproc) stage release # bootstrapinam i /opt/boost
-	./b2 --prefix=/opt/boost --without-python install # bootstrapinam i /opt/boost
+    cd && curl -o boost_${boost_v}.tar.gz -SL https://dl.bintray.com/boostorg/release/${boost_ver}/source/boost_${boost_v}.tar.gz
+    tar -xzf boost_${boost_v}.tar.gz
+    rm boost_${boost_v}.tar.gz
+    mkdir $HOME/boost 
+    sudo mv $HOME/boost /opt/boost
+    cd boost_${boost_v}
+    ./bootstrap.sh --prefix=/opt/boost # bootstrapinam i /opt/boost
+    ./b2 --prefix=/opt/boost --without-python -j $(nproc) stage release # bootstrapinam i /opt/boost
+    ./b2 --prefix=/opt/boost --without-python install # bootstrapinam i /opt/boost
 }
 
 function build_dependancies() {
@@ -287,12 +288,15 @@ function build_catapult_server_9_3_2() {
 	# CATAPULT server
 	cd && git clone https://github.com/nemtech/catapult-server.git
 	cd catapult-server
-	mkdir /opt/catapult-server
 	git checkout v0.9.3.2
 	export HASHING_FUNCTION=sha3
+	
+	mkdir $HOME/catapult 
+	sudo mv $HOME/catapult /opt/catapult
+	
 	#mkdir build && cd build # replacing _build to build. for future scripts
 	mkdir _build && cd _build
-	cmake -DBOOST_ROOT=/opt/boost -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/catapult-server -G Ninja .. # bootstrapinam boost root i /opt/boost, install i /opt/catapult reikia pabandyti
+	cmake -DBOOST_ROOT=/opt/boost -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/catapult -G Ninja .. # bootstrapinam boost root i /opt/boost, install i /opt/catapult reikia pabandyti
 	ninja publish
 	ninja -j $(nproc)
 	echo "All good?"
