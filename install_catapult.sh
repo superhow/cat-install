@@ -2,7 +2,7 @@
 # Install and build Symbol catapult server and dependancies interactive script version v1.0
 # Copyright (c) 2020 superhow, ministras, SUPER HOW UAB licensed under the GNU Lesser General Public License v3
 
-SCRIPT_VER=1.E
+SCRIPT_VER=1.F
 SSH_PORT=22
 CAT_VER=0.9.3.2
 cd
@@ -26,7 +26,7 @@ function print_menu() {
     echo "*   Instructions are for gcc, but compiles with clang 9 as well"
     echo "**"
     echo "*       - OpenSSL dev library, at least 1.1.1 (libssl-dev)"
-    echo "*       - cmake (at least 3.14)"
+    echo "*       - cmake (at least 3.17)"
     echo "*       - git"
     echo "*       - python 3.x"
     echo "*       - gcc 9.2"
@@ -100,6 +100,7 @@ function do_system_update() {
 function install_dependancies() {
     sudo apt-get --yes install autoconf automake build-essential curl cmake git gcc g++ gdb mc ninja-build pkg-config python3 python3-ply python-dev
     sudo apt-get --yes install libtool libssl-dev libatomic-ops-dev libunwind-dev libgflags-dev libsnappy-dev libxml2-dev libxslt-dev screen zsh xz-utils
+	#TODO patikrinti ar sitie vis dar reikalingi: libatomic-ops-dev libunwind-dev libgflags-dev libsnappy-dev libxml2-dev libxslt-dev
     #Install new version of GCC v9.2: https://linuxize.com/post/how-to-install-gcc-compiler-on-ubuntu-18-04/
     sudo apt-get --yes install software-properties-common
     sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
@@ -145,12 +146,11 @@ function install_boost() {
 	cd && curl -o boost_${boost_v}.tar.gz -SL https://dl.bintray.com/boostorg/release/${boost_ver}/source/boost_${boost_v}.tar.gz
 	tar -xzf boost_${boost_v}.tar.gz
 	rm boost_${boost_v}.tar.gz
-	## WARNING: below use $HOME rather than ~ - boost scripts might treat it literally
-	mkdir boost-build
+	mkdir /opt/boost
 	cd boost_${boost_v}
-	./bootstrap.sh --prefix=${HOME}/boost-build
-	./b2 --prefix=${HOME}/boost-build --without-python -j $(nproc) stage release
-	./b2 --prefix=${HOME}/boost-build --without-python install
+	./bootstrap.sh --prefix=/opt/boost # bootstrapinam i /opt/boost
+	./b2 --prefix=/opt/boost --without-python -j $(nproc) stage release # bootstrapinam i /opt/boost
+	./b2 --prefix=/opt/boost --without-python install # bootstrapinam i /opt/boost
 }
 
 function build_dependancies() {
@@ -251,8 +251,8 @@ function build_rocksdb() {
 	#cmake -DCMAKE_BUILD_TYPE=Release -DWITH_TESTS=OFF . -DCMAKE_INSTALL_PREFIX=/usr/local ..
 	#make
 	sudo make install-shared
-	#echo "All good?"
-	#read ANYKEY
+	echo "All good?"
+	read ANYKEY
 }
 
 function build_catapult() {
@@ -276,7 +276,7 @@ function build_catapult_superhow_9_3_2() {
 	export HASHING_FUNCTION=sha3
 	mkdir build && cd build # replacing _build to build. for future scripts
 	#mkdir _build && cd _build
-	cmake -DBOOST_ROOT=~/boost-build -DCMAKE_BUILD_TYPE=Release -G Ninja ..
+	cmake -DBOOST_ROOT=/opt/boost -DCMAKE_BUILD_TYPE=Release -G Ninja ..
 	ninja publish
 	ninja -j $(nproc)
 	#echo "All good?"
@@ -287,15 +287,16 @@ function build_catapult_server_9_3_2() {
 	# CATAPULT server
 	cd && git clone https://github.com/nemtech/catapult-server.git
 	cd catapult-server
+	mkdir /opt/catapult-server
 	git checkout v0.9.3.2
 	export HASHING_FUNCTION=sha3
 	#mkdir build && cd build # replacing _build to build. for future scripts
 	mkdir _build && cd _build
-	cmake -DBOOST_ROOT=~/boost-build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${HOME}/catapult -G Ninja ..
+	cmake -DBOOST_ROOT=/opt/boost -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/catapult-server -G Ninja .. # bootstrapinam boost root i /opt/boost, install i /opt/catapult reikia pabandyti
 	ninja publish
 	ninja -j $(nproc)
-	#echo "All good?"
-	#read ANYKEY
+	echo "All good?"
+	read ANYKEY
 }
 
 function install_rest() {
@@ -370,11 +371,11 @@ function generate_accounts() {
 	read ACCOUNT_COUNT
 	# Generate 3 accounts for "nemesis_signer" , "node owner" and "REST owner"!!!
 	# Generate 3 additional accounts for "api owner", peer1 owner" and "peer2 owner"!!!
-	cd ${HOME}/catapult/
+	cd /opt/catapult-server
 	# mkdir catapult-node
 	# catapult-node && mkdir data && mkdir nemesis && mkdir resources && mkdir scripts && mkdir seed
-	${HOME}/catapult/bin/catapult.tools.address -g ${ACCOUNT_COUNT} --network mijin | tee ${HOME}/catapult/nemesis_signer.txt
-    cd ${HOME}/catapult
+	/opt/catapult-server/bin/catapult.tools.address -g ${ACCOUNT_COUNT} --network mijin | tee /opt/catapult-server/nemesis_signer.txt
+    cd /opt/catapult-server
     mkdir nemesis && mkdir data && mkdir tmp
 }
 
@@ -383,7 +384,7 @@ function initialize_seed() {
 	git clone https://github.com/superhow/cat-config.git
 	
 	# First private and public keys from the file ~/catapult-node/nemesis_signer.txt --local (local node) --dual (peer & api in one)
-	cd ${HOME}/catapult
+	cd /opt/catapult-server
 
 	# zsh scripts/cat-config/reset.sh --local dual ~/catapult-node <private_key> <public_key>
 }
