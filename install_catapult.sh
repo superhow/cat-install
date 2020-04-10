@@ -149,9 +149,9 @@ function install_boost() {
     mkdir $HOME/boost 
     sudo -E mv $HOME/boost /opt/boost
     cd boost_${boost_v}
-    ./bootstrap.sh --prefix=/opt/boost # bootstrapinam i /opt/boost
-    ./b2 --prefix=/opt/boost --without-python -j $(nproc) stage release # bootstrapinam i /opt/boost
-    ./b2 --prefix=/opt/boost --without-python install # bootstrapinam i /opt/boost
+    ./bootstrap.sh --prefix=/opt/boost
+    ./b2 --prefix=/opt/boost --without-python -j $(nproc) stage release
+    ./b2 --prefix=/opt/boost --without-python install
 }
 
 function build_dependancies() {
@@ -296,7 +296,8 @@ function build_catapult_server_9_3_2() {
 	
 	#mkdir build && cd build # replacing _build to build. for future scripts
 	mkdir _build && cd _build
-	cmake -DBOOST_ROOT=/opt/boost -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/catapult -G Ninja .. # bootstrapinam boost root i /opt/boost, install i /opt/catapult reikia pabandyti
+	cmake -DBOOST_ROOT=/opt/boost -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/catapult -G Ninja ..
+	# bootstrapinam boost root i /opt/boost, install i /opt/catapult reikia pabandyti
 	ninja publish
 	ninja -j $(nproc)
 	echo "All good?"
