@@ -2,7 +2,7 @@
 # Install and build Symbol catapult server and dependancies interactive script version v1.0
 # Copyright (c) 2020 superhow, ministras, SUPER HOW UAB licensed under the GNU Lesser General Public License v3
 
-SCRIPT_VER=1.I
+SCRIPT_VER=1.J
 SSH_PORT=22
 CAT_VER=0.9.3.2
 cmake_ver=3.17.0
@@ -100,7 +100,7 @@ function do_system_update() {
 function install_dependancies() {
     sudo apt-get --yes install autoconf automake build-essential curl cmake git gcc g++ gdb mc ninja-build pkg-config python3 python3-ply python-dev
     sudo apt-get --yes install libtool libssl-dev libatomic-ops-dev libunwind-dev libgflags-dev libsnappy-dev libxml2-dev libxslt-dev screen zsh xz-utils
-	#TODO patikrinti ar sitie vis dar reikalingi: libatomic-ops-dev libunwind-dev libgflags-dev libsnappy-dev libxml2-dev libxslt-dev
+    #TODO patikrinti ar sitie vis dar reikalingi: libatomic-ops-dev libunwind-dev libgflags-dev libsnappy-dev libxml2-dev libxslt-dev
     #Install new version of GCC v9.2: https://linuxize.com/post/how-to-install-gcc-compiler-on-ubuntu-18-04/
     sudo -E apt-get --yes install software-properties-common
     sudo -E add-apt-repository --yes ppa:ubuntu-toolchain-r/test
@@ -154,11 +154,11 @@ function install_boost() {
 function build_dependancies() {
     clear
     echo
-	echo "+================================================================+"
+    echo "+================================================================+"
     echo "| Build Catapult DEPENDANCIES, build TOOLS? [y/n]"
     echo "| gtest, benchmark, mongoc, zmq tools and drivers"
     echo "+================================================================+"
-	echo
+    echo
     read DOINSTALL
     if [[ $DOINSTALL =~ "y" ]] || [[ $DOINSTALL =~ "Y" ]] ; then
         sudo apt-get update
@@ -175,132 +175,132 @@ function build_dependancies() {
 }
 
 function build_gtest() {
-	# Gtest
-	cd && git clone https://github.com/google/googletest.git
-	cd googletest/
-	git checkout release-1.8.1
-	mkdir _build && cd _build
-	cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON ..
-	make
-	sudo make install
+    # Gtest
+    cd && git clone https://github.com/google/googletest.git
+    cd googletest/
+    git checkout release-1.8.1
+    mkdir _build && cd _build
+    cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON ..
+    make
+    sudo make install
 }
 
 function build_benchmark() {
-	# Google benchmark
-	cd && git clone https://github.com/google/benchmark.git
-	cd benchmark/
-	git checkout v1.5.0
-	mkdir _build && cd _build
-	cmake -DCMAKE_BUILD_TYPE=Release -DBENCHMARK_ENABLE_GTEST_TESTS=OFF ..
-	make
-	sudo make install
+    # Google benchmark
+    cd && git clone https://github.com/google/benchmark.git
+    cd benchmark/
+    git checkout v1.5.0
+    mkdir _build && cd _build
+    cmake -DCMAKE_BUILD_TYPE=Release -DBENCHMARK_ENABLE_GTEST_TESTS=OFF ..
+    make
+    sudo make install
 }
 
 function build_mongoc() {
-	# Mongo driver mongo-c
-	# cd && sudo apt -y install libmongoc-1.0-0 libbson-1.0
-	cd && git clone https://github.com/mongodb/mongo-c-driver.git
-	cd mongo-c-driver/
-	git checkout 1.15.1
-	mkdir _build && cd _build
-	cmake -DENABLE_AUTOMATIC_INIT_AND_CLEANUP=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local ..
-	make
-	sudo make install
+    # Mongo driver mongo-c
+    # cd && sudo apt -y install libmongoc-1.0-0 libbson-1.0
+    cd && git clone https://github.com/mongodb/mongo-c-driver.git
+    cd mongo-c-driver/
+    git checkout 1.15.1
+    mkdir _build && cd _build
+    cmake -DENABLE_AUTOMATIC_INIT_AND_CLEANUP=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local ..
+    make
+    sudo make install
 }
 
 function build_mongocxx() {
-	# Mongo driver mongo-c++
-	cd && git clone https://github.com/nemtech/mongo-cxx-driver.git
-	cd mongo-cxx-driver/
-	git checkout r3.4.0-nem
-	#TODO: find out why do we need maxAwaitTimeMS patch...
-	#sed -i 's/kvp("maxAwaitTimeMS", count)/kvp("maxAwaitTimeMS", static_cast<int64_t>(count))/' src/mongocxx/options/change_stream.cpp
-	mkdir _build && cd _build
-	#cmake -DCMAKE_CXX_STANDARD=17 -DLIBBSON_DIR=/usr/local -DLIBMONGOC_DIR=/usr/local -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local ..
-	cmake -DCMAKE_CXX_STANDARD=17 -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local ..
-	make
-	sudo make install
+    # Mongo driver mongo-c++
+    cd && git clone https://github.com/nemtech/mongo-cxx-driver.git
+    cd mongo-cxx-driver/
+    git checkout r3.4.0-nem
+    #TODO: find out why do we need maxAwaitTimeMS patch...
+    #sed -i 's/kvp("maxAwaitTimeMS", count)/kvp("maxAwaitTimeMS", static_cast<int64_t>(count))/' src/mongocxx/options/change_stream.cpp
+    mkdir _build && cd _build
+    #cmake -DCMAKE_CXX_STANDARD=17 -DLIBBSON_DIR=/usr/local -DLIBMONGOC_DIR=/usr/local -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local ..
+    cmake -DCMAKE_CXX_STANDARD=17 -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local ..
+    make
+    sudo make install
 }
 
 function build_zmq() {
-	# ZMQ libzmq
-	cd && git clone https://github.com/zeromq/libzmq.git
-	cd libzmq/
-	git checkout v4.3.2
-	mkdir _build && cd _build
-	cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local ..
-	make
-	sudo make install
+    # ZMQ libzmq
+    cd && git clone https://github.com/zeromq/libzmq.git
+    cd libzmq/
+    git checkout v4.3.2
+    mkdir _build && cd _build
+    cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local ..
+    make
+    sudo make install
 
-	# ZMQ cppzmq
-	cd && git clone https://github.com/zeromq/cppzmq.git
-	cd cppzmq/
-	git checkout v4.4.1
-	mkdir _build && cd _build
-	cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local ..
-	make
-	sudo make install
+    # ZMQ cppzmq
+    cd && git clone https://github.com/zeromq/cppzmq.git
+    cd cppzmq/
+    git checkout v4.4.1
+    mkdir _build && cd _build
+    cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local ..
+    make
+    sudo make install
 }
 
 function build_rocksdb() {
-	# RocksDB
-	cd && git clone https://github.com/nemtech/rocksdb.git
-	cd rocksdb/
-	git checkout v6.6.4-nem
-	mkdir _build
-	# && cd _build
-	# cmake -DCMAKE_BUILD_TYPE=Release -DWITH_TESTS=OFF . -DCMAKE_INSTALL_PREFIX=/usr/local ..
-	# make
-	sudo make install-shared
-	#echo "All good?"
-	#read ANYKEY
+    # RocksDB
+    cd && git clone https://github.com/nemtech/rocksdb.git
+    cd rocksdb/
+    git checkout v6.6.4-nem
+    mkdir _build
+    # && cd _build
+    # cmake -DCMAKE_BUILD_TYPE=Release -DWITH_TESTS=OFF . -DCMAKE_INSTALL_PREFIX=/usr/local ..
+    # make
+    sudo make install-shared
+    #echo "All good?"
+    #read ANYKEY
 }
 
 function build_catapult() {
-	clear
-	echo
+    clear
+    echo
     echo "+================================================================+"
-	echo "|   Build catapult server v${CAT_VER} from SUPER HOW git? [y/n]"
+    echo "|   Build catapult server v${CAT_VER} from SUPER HOW git? [y/n]"
     echo "+================================================================+"
-	echo
-	read DOINSTALL
-	if [[ $DOINSTALL =~ "y" ]] || [[ $DOINSTALL =~ "Y" ]] ; then
-		sudo apt-get update
-		build_catapult_server
-		#build_catapult_superhow_9_3_2
-		echo "All good?"
-	    read ANYKEY
-	fi
+    echo
+    read DOINSTALL
+    if [[ $DOINSTALL =~ "y" ]] || [[ $DOINSTALL =~ "Y" ]] ; then
+        sudo apt-get update
+        build_catapult_server
+        #build_catapult_superhow_9_3_2
+        echo "All good?"
+        read ANYKEY
+    fi
 }
 
 function build_catapult_superhow_9_3_2() {
-	# CATAPULT server
-	cd && git clone https://bitbucket.org/superhow/catapult-server.git -b release
-	cd catapult-server/
-	export HASHING_FUNCTION=sha3
-	mkdir build && cd build # replacing _build to build. for future scripts
-	#mkdir _build && cd _build
-	cmake -DBOOST_ROOT=/opt/boost -DCMAKE_BUILD_TYPE=Release -G Ninja ..
-	ninja publish
-	ninja -j $(nproc)
+    # CATAPULT server
+    cd && git clone https://bitbucket.org/superhow/catapult-server.git -b release
+    cd catapult-server/
+    export HASHING_FUNCTION=sha3
+    mkdir build && cd build # replacing _build to build. for future scripts
+    #mkdir _build && cd _build
+    cmake -DBOOST_ROOT=/opt/boost -DCMAKE_BUILD_TYPE=Release -G Ninja ..
+    ninja publish
+    ninja -j $(nproc)
 }
 
 function build_catapult_server() {
-	# Build CATAPULT server
-	mkdir $HOME/catapult 
-	sudo -E mv $HOME/catapult /opt/catapult
+    # Build CATAPULT server
+    mkdir $HOME/catapult 
+    sudo -E mv $HOME/catapult /opt/catapult
 
-	cd && git clone https://github.com/nemtech/catapult-server.git
-	cd catapult-server/
-	git checkout v${CAT_VER}
-	export HASHING_FUNCTION=sha3
+    cd && git clone https://github.com/nemtech/catapult-server.git
+    cd catapult-server/
+    git checkout v${CAT_VER}
+    export HASHING_FUNCTION=sha3
 
-	#mkdir build && cd build # replacing _build to build. for future scripts
-	mkdir _build && cd _build
-	cmake -DBOOST_ROOT=/opt/boost -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/catapult -G Ninja ..
-	# bootstrapinam boost root i /opt/boost, install i /opt/catapult reikia pabandyti
-	ninja publish
-	ninja -j $(nproc)
+    #mkdir build && cd build # replacing _build to build. for future scripts
+    mkdir _build && cd _build
+    cmake -DBOOST_ROOT=/opt/boost -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/catapult -G Ninja ..
+    # bootstrapinam boost root i /opt/boost, install i /opt/catapult reikia pabandyti
+    ninja publish
+    ninja -j $(nproc)
 }
 
 function install_rest() {
