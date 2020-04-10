@@ -2,9 +2,12 @@
 # Install and build Symbol catapult server and dependancies interactive script version v1.0
 # Copyright (c) 2020 superhow, ministras, SUPER HOW UAB licensed under the GNU Lesser General Public License v3
 
-SCRIPT_VER=1.G
+SCRIPT_VER=1.H
 SSH_PORT=22
 CAT_VER=0.9.3.2
+cmake_ver=3.17.0
+boost_v=1_72_0
+boost_ver=1.72.0
 cd
 # echo "Be sure to use screen before running. There will be several prompts for sudo password"
 # echo "This script is prepared to be executed with user 'root' or any other user"
@@ -14,48 +17,45 @@ function print_menu() {
     echo
     echo
     echo
-    echo
-    echo "***************************************************************"
-    echo "*   Symbol CATAPULT install and build script by SUPER HOW?"
-    echo "*   - build and install all Symbol CATAPULT dependancies"
-    echo "*   - build and install Symbol CATAPULT ${CAT_VER}"
-    echo "*   - generate Symbol CATAPULT seed"
-    echo "**"
-    echo "*   Script to be run by limited user, will need sudo rights"
-    echo "*   Prerequisites from github/nemtech	for building on Ubuntu 18.04"
-    echo "*   Instructions are for gcc, but compiles with clang 9 as well"
-    echo "**"
-    echo "*       - OpenSSL dev library, at least 1.1.1 (libssl-dev)"
-    echo "*       - cmake (at least 3.17)"
-    echo "*       - git"
-    echo "*       - python 3.x"
-    echo "*       - gcc 9.2"
-    echo "*       - ninja-build"
-    echo "**"
-    echo "*===================================================+==========*"
-    echo "|    Script version: v${SCRIPT_VER}                            |"
-    echo "|    Crafted with love by: ministras, linas and bruce_wayne     |"
-    echo "|    2020 (C) https://SUPERHOW.io                               |"
-    echo "*=======================================+======================*"
+    echo "+================================================================+"
+    echo "|   Symbol CATAPULT install and build script by SUPER HOW?"
+    echo "|   - build and install all Symbol CATAPULT dependancies"
+    echo "|   - build and install Symbol CATAPULT ${CAT_VER}"
+    echo "|   - generate Symbol CATAPULT seed"
+    echo "|+"
+    echo "|   Script to be run by limited user, will need sudo rights"
+    echo "|   Prerequisites from github/nemtech	for building on Ubuntu 18.04"
+    echo "|       - OpenSSL dev library, at least 1.1.1 (libssl-dev)"
+    echo "|       - cmake (at least 3.17)"
+    echo "|       - git"
+    echo "|       - python 3.x"
+    echo "|       - gcc 9.2"
+    echo "|       - ninja-build"
+    echo "|"
+    echo "+================================================================+"
+    echo "|    Script version: v${SCRIPT_VER}"
+    echo "|    Crafted with love by: ministras, linas and bruce_wayne"
+    echo "|    2020 (C) https://SUPERHOW.io"
+    echo "+================================================================+"
     os_version_check
-    echo "*==============================================================*"
-    echo "| MENU:                                                        |"
-    echo "|                                                              |"
-    echo "|  1) Step 1: Build BASE system dependencies i.e. Cmake, Boost |"
-    echo "|  2) Step 2: Build CATAPULT dependencies i.e. drivers, rocksdb|"
-    echo "|  3) Step 3: Build Symbol mijin CATAPULT F5 from git          |"
-    echo "|  4) Step 4: Build MONGO.DB, NODE.JS and CATAPULT REST        |"
-    echo "|  5) Step 5: Generate keys and instialize CATAPULT seed       |"
-    echo "|  9) Setup Firewall and change SSH port (TODO)                |"
-    echo "|  0) Tool: Just do system update & upgrade                    |"	
-    echo "|                                                              |"
-    echo "|  80) Hostname                                                |" 
-    echo "|  91) Reboot                                                  |"
-    echo "|  92) Shutdown                                                |"
-    echo "|  100) Print menu                                             |"
-    echo "|                                                              |"
-    echo "|  q) Quit                                                     |"
-    echo "*==============================================================*"
+    echo "+================================================================+"
+    echo "| MENU:                                                          |"
+    echo "|                                                                |"
+    echo "|  1) Step 1: Build System dependencies: GCC, Cmake, Boost, etc. |"
+    echo "|  2) Step 2: Build CAT dependencies: gtest, mongocxx, rocksdb.. |"
+    echo "|  3) Step 3: Build Symbol CATAPULT mijin from git               |"
+    echo "|  4) Step 4: Build mongodb, NODE.JS and CATAPULT REST           |"
+    echo "|  5) Step 5: Generate keys and instialize CATAPULT seed         |"
+    echo "|  9) Setup Firewall and change SSH port (TODO)                  |"
+    echo "|  0) Tool: Just do system update & upgrade                      |"	
+    echo "|                                                                |"
+    echo "|  80) Hostname                                                  |" 
+    echo "|  91) Reboot                                                    |"
+    echo "|  92) Shutdown                                                  |"
+    echo "|  100) Print menu                                               |"
+    echo "|                                                                |"
+    echo "|  q) Quit                                                       |"
+    echo "+================================================================+"
 }
 
 function os_version_check() {
@@ -71,10 +71,10 @@ function os_version_check() {
 
 function build_base() {
     clear
-    echo "*---------------------------------------------------------*"
-    echo "| UPDATE system, install BASE dependancies? [y/n]         |"
-    echo "| Boot, Cmake for CATAPULT version: ${CAT_VER}            |"
-    echo "*---------------------------------------------------------*"
+    echo "+================================================================+"
+    echo "| UPDATE system, install base System dependancies? [y/n]"
+    echo "| GCC-9, Boost v${boost_ver}, Cmake v${cmake_ver}"
+    echo "+================================================================+"
     read DOINSTALL
     if [[ $DOINSTALL =~ "y" ]] || [[ $DOINSTALL =~ "Y" ]] ; then
         # change_ssh_port
@@ -115,7 +115,6 @@ function install_dependancies() {
 
 function install_cmake() {
     # CMAKE v3.15.4 or v3.17.0
-    cmake_ver=3.17.0
     echo
     echo "Installing Cmake ${cmake_ver}"
     echo
@@ -138,8 +137,6 @@ function install_cmake() {
 
 function install_boost() {
     # Boost - c++ v1.71.0 or v1.72.0
-    boost_v=1_72_0
-    boost_ver=1.72.0
     echo
     echo "Installing BOOST ${boost_ver}"
     echo
@@ -156,10 +153,12 @@ function install_boost() {
 
 function build_dependancies() {
     clear
-    echo "*---------------------------------------------------------*"
-    echo "| Build Catapult DEPENDANCIES, build TOOLS? [y/n]         |"
-    echo "| Tools and drivers for CATAPULT version: ${CAT_VER}      |"
-    echo "*---------------------------------------------------------*"
+    echo
+	echo "+================================================================+"
+    echo "| Build Catapult DEPENDANCIES, build TOOLS? [y/n]"
+    echo "| gtest, benchmark, mongoc, zmq tools and drivers"
+    echo "+================================================================+"
+	echo
     read DOINSTALL
     if [[ $DOINSTALL =~ "y" ]] || [[ $DOINSTALL =~ "Y" ]] ; then
         sudo apt-get update
@@ -248,25 +247,28 @@ function build_rocksdb() {
 	cd && git clone https://github.com/nemtech/rocksdb.git
 	cd rocksdb
 	git checkout v6.6.4-nem
-	#mkdir _build && cd _build
-	#cmake -DCMAKE_BUILD_TYPE=Release -DWITH_TESTS=OFF . -DCMAKE_INSTALL_PREFIX=/usr/local ..
-	#make
+	# mkdir _build && cd _build
+	# cmake -DCMAKE_BUILD_TYPE=Release -DWITH_TESTS=OFF . -DCMAKE_INSTALL_PREFIX=/usr/local ..
+	# make
 	sudo make install-shared
-	echo "All good?"
-	read ANYKEY
+	#echo "All good?"
+	#read ANYKEY
 }
 
 function build_catapult() {
 	clear
 	echo
-	echo "*-------------------------------------------------------------*"
-	echo "|   Build catapult server ${CAT_VER} from SUPER HOW git? [y/n]|"
-	echo "*-------------------------------------------------------------*"
+    echo "+================================================================+"
+	echo "|   Build catapult server v${CAT_VER} from SUPER HOW git? [y/n]"
+    echo "+================================================================+"
+	echo
 	read DOINSTALL
 	if [[ $DOINSTALL =~ "y" ]] || [[ $DOINSTALL =~ "Y" ]] ; then
 		sudo apt-get update
-		build_catapult_server_9_3_2
+		build_catapult_server
 		#build_catapult_superhow_9_3_2
+		echo "All good?"
+	    read ANYKEY
 	fi
 }
 
@@ -280,37 +282,34 @@ function build_catapult_superhow_9_3_2() {
 	cmake -DBOOST_ROOT=/opt/boost -DCMAKE_BUILD_TYPE=Release -G Ninja ..
 	ninja publish
 	ninja -j $(nproc)
-	#echo "All good?"
-	#read ANYKEY
 }
 
-function build_catapult_server_9_3_2() {
-	# CATAPULT server
-	cd && git clone https://github.com/nemtech/catapult-server.git
-	cd catapult-server
-	git checkout v0.9.3.2
-	export HASHING_FUNCTION=sha3
-	
+function build_catapult_server() {
+	# Build CATAPULT server
 	mkdir $HOME/catapult 
 	sudo -E mv $HOME/catapult /opt/catapult
-	
+
+	cd && git clone https://github.com/nemtech/catapult-server.git
+	cd catapult-server
+	git checkout v${CAT_VER}
+	export HASHING_FUNCTION=sha3
+
 	#mkdir build && cd build # replacing _build to build. for future scripts
 	mkdir _build && cd _build
 	cmake -DBOOST_ROOT=/opt/boost -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/catapult -G Ninja ..
 	# bootstrapinam boost root i /opt/boost, install i /opt/catapult reikia pabandyti
 	ninja publish
 	ninja -j $(nproc)
-	echo "All good?"
-	read ANYKEY
 }
 
 function install_rest() {
 	clear
-	echo ""
-	echo "*----------------------------------------------------------------*"
-	echo "|             Install MONGO, NODE.JS, CATAPULT REST? [y/n]       |"
-	echo "|             CATAPULT version: ${CAT_VER}                       |"
-	echo "*----------------------------------------------------------------*"
+	echo
+    echo "+================================================================+"
+	echo "|             Install MONGODB, NODE.JS, CATAPULT REST? [y/n]"
+	echo "|             CATAPULT version: ${CAT_VER}"
+    echo "+================================================================+"
+	echo
 	read DOINSTALL
 	if [[ $DOINSTALL =~ "y" ]] || [[ $DOINSTALL =~ "Y" ]] ; then
 		install_mongodb
@@ -354,11 +353,12 @@ function install_catapult_rest() {
 
 function init_seed() {
 	clear
-	echo ""
-	echo "*------------------------------------------------------------*"
-	echo "|  Generate GENESIS keys and initialize CATAPULT seed? [y/n] |"
-	echo "|  CATAPULT version: ${CAT_VER}                              |"
-	echo "*------------------------------------------------------------*"
+	echo
+    echo "+================================================================+"
+	echo "|  Generate GENESIS keys and initialize CATAPULT seed? [y/n]"
+	echo "|  CATAPULT version: ${CAT_VER}"
+    echo "+================================================================+"
+	echo
 	read DOINSTALL
 	if [[ $DOINSTALL =~ "y" ]] || [[ $DOINSTALL =~ "Y" ]] ; then
 		generate_accounts
@@ -368,11 +368,11 @@ function init_seed() {
 
 function generate_accounts() {
 	clear
-	echo ""
-	echo "*---------------------------------------------------------*"
-	echo "|       How many accounts you need? [3-10]                |"
-	echo "|       Enter number from 3 to 10                         |"
-	echo "*---------------------------------------------------------*"
+	echo
+    echo "+================================================================+"
+	echo "|       How many accounts you need? [3-10]"
+    echo "+================================================================+"
+	echo
 	read ACCOUNT_COUNT
 	# Generate 3 accounts for "nemesis_signer" , "node owner" and "REST owner"!!!
 	# Generate 3 additional accounts for "api owner", peer1 owner" and "peer2 owner"!!!
