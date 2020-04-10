@@ -2,7 +2,7 @@
 # Install and build Symbol catapult server and dependancies interactive script version v1.0
 # Copyright (c) 2020 superhow, ministras, SUPER HOW UAB licensed under the GNU Lesser General Public License v3
 
-SCRIPT_VER=1.J
+SCRIPT_VER=1.K
 SSH_PORT=22
 CAT_VER=0.9.3.2
 cmake_ver=3.17.0
@@ -16,26 +16,24 @@ function print_menu() {
     #clear
     echo
     echo
-    echo
     echo "+================================================================+"
-    echo "|   Symbol CATAPULT install and build script by SUPER HOW?"
-    echo "|   - build and install all Symbol CATAPULT dependancies"
-    echo "|   - build and install Symbol CATAPULT v${CAT_VER}"
-    echo "|   - generate Symbol CATAPULT seed"
-    echo "|+"
-    echo "|   Script to be run by limited user, will need sudo rights"
-    echo "|   Prerequisites from github/nemtech	for building on Ubuntu 18.04"
-    echo "|       - OpenSSL dev library, at least 1.1.1 (libssl-dev)"
-    echo "|       - cmake (at least 3.17)"
-    echo "|       - git"
-    echo "|       - python 3.x"
-    echo "|       - gcc 9.2"
-    echo "|       - ninja-build"
-    echo "|"
+    echo "| Symbol CATAPULT install and build script by SUPER HOW?         |"
+    echo "|    - build and install all Symbol CATAPULT dependancies        |"
+    echo "|    - build and install Symbol CATAPULT v${CAT_VER}                |"
+    echo "|    - generate Symbol CATAPULT seed                             |"
+    echo "|+                                                              +|"
+    echo "| Script to be run by limited user, will need sudo rights        |"
+    echo "| Prerequisites from github/nemtech for building on Ubuntu 18.04 |"
+    echo "|    - OpenSSL dev library, at least 1.1.1 (libssl-dev)          |"
+    echo "|    - cmake (at least 3.17)                                     |"
+    echo "|    - python 3.x                                                |"
+    echo "|    - gcc 9.2                                                   |"
+    echo "|    - ninja-build                                               |"
+    echo "|                                                                |"
     echo "+================================================================+"
-    echo "|    Script version: v${SCRIPT_VER}"
-    echo "|    Crafted with love by: ministras, linas and bruce_wayne"
-    echo "|    2020 (C) https://SUPERHOW.io"
+    echo "|    Script version: v${SCRIPT_VER}                                        |"
+    echo "|    Crafted with love by: ministras, linas and bruce_wayne      |"
+    echo "|    2020 (C) https://SUPERHOW.io                                |"
     echo "+================================================================+"
     os_version_check
     echo "+================================================================+"
@@ -56,6 +54,7 @@ function print_menu() {
     echo "|                                                                |"
     echo "|  q) Quit                                                       |"
     echo "+================================================================+"
+	echo
 }
 
 function os_version_check() {
@@ -72,7 +71,7 @@ function os_version_check() {
 function build_base() {
     clear
     echo "+================================================================+"
-    echo "| UPDATE system, install base System dependancies? [y/n]"
+    echo "| UPDATE system, install base System dependancies? [y/n]         |"
     echo "| GCC-9, Boost v${boost_ver}, Cmake v${cmake_ver}"
     echo "+================================================================+"
     read DOINSTALL
@@ -132,7 +131,7 @@ function install_cmake() {
     cd && cmake --version
     python3 --version
     gcc --version
-    rm -rf cmake-${cmake_ver}/
+    #rm -rf cmake-${cmake_ver}/
 }
 
 function install_boost() {
@@ -149,14 +148,15 @@ function install_boost() {
     ./bootstrap.sh --prefix=/opt/boost
     ./b2 --prefix=/opt/boost --without-python -j $(nproc) stage release
     ./b2 --prefix=/opt/boost --without-python install
+	#rm -rf boost_${boost_v}/
 }
 
 function build_dependancies() {
     clear
     echo
     echo "+================================================================+"
-    echo "| Build Catapult DEPENDANCIES, build TOOLS? [y/n]"
-    echo "| gtest, benchmark, mongoc, zmq tools and drivers"
+    echo "|       Build Catapult DEPENDANCIES, build TOOLS? [y/n]          |"
+    echo "|       gtest, benchmark, mongoc, zmq tools and drivers          |"
     echo "+================================================================+"
     echo
     read DOINSTALL
@@ -198,7 +198,6 @@ function build_benchmark() {
 
 function build_mongoc() {
     # Mongo driver mongo-c
-    # cd && sudo apt -y install libmongoc-1.0-0 libbson-1.0
     cd && git clone https://github.com/mongodb/mongo-c-driver.git
     cd mongo-c-driver/
     git checkout 1.15.1
@@ -297,101 +296,102 @@ function build_catapult_server() {
 
     #mkdir build && cd build # replacing _build to build. for future scripts
     mkdir _build && cd _build
-    cmake -DBOOST_ROOT=/opt/boost -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/catapult -G Ninja ..
+    #cmake -DBOOST_ROOT=/opt/boost -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/catapult -G Ninja ..
+    cmake -DBOOST_ROOT=/opt/boost -DCMAKE_BUILD_TYPE=Release -DCMAKE_BINARY_DIR=/opt/catapult -G Ninja ..
     # bootstrapinam boost root i /opt/boost, install i /opt/catapult reikia pabandyti
     ninja publish
     ninja -j $(nproc)
 }
 
 function install_rest() {
-	clear
-	echo
+    clear
+    echo
     echo "+================================================================+"
-	echo "|             Install MONGODB, NODE.JS, CATAPULT REST? [y/n]"
-	echo "|             CATAPULT version: ${CAT_VER}"
+    echo "|             Install MONGODB, NODE.JS, CATAPULT REST? [y/n]"
+    echo "|             CATAPULT version: ${CAT_VER}"
     echo "+================================================================+"
-	echo
-	read DOINSTALL
-	if [[ $DOINSTALL =~ "y" ]] || [[ $DOINSTALL =~ "Y" ]] ; then
-		install_mongodb
-		install_node_js
-		echo "All good?"
-		read ANYKEY
-		install_catapult_rest
-	fi
+    echo
+    read DOINSTALL
+    if [[ $DOINSTALL =~ "y" ]] || [[ $DOINSTALL =~ "Y" ]] ; then
+        install_mongodb
+        install_node_js
+        echo "All good?"
+        read ANYKEY
+        install_catapult_rest
+    fi
 }
 
 function install_mongodb() {
-	# Install MongoDB. MANDATORY
-	cd
-	sudo apt-get update
-	sudo apt-get --yes install mongodb
-	sudo systemctl start mongodb
-	sudo systemctl enable mongodb
-	sudo systemctl status mongodb
+    # Install MongoDB. MANDATORY
+    cd
+    sudo apt-get update
+    sudo apt-get --yes install mongodb
+    sudo systemctl start mongodb
+    sudo systemctl enable mongodb
+    sudo systemctl status mongodb
 }
 
 function install_node_js() {
-	# Install Node.js v10 & yarn for REST API
-	cd
-	curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
-	sudo apt-get --yes install nodejs
-	curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | sudo -E apt-key add -
-	echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
-	sudo apt-get update
-	sudo apt-get --yes install yarn
+    # Install Node.js v10 & yarn for REST API
+    cd
+    curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
+    sudo apt-get --yes install nodejs
+    curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | sudo -E apt-key add -
+    echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+    sudo apt-get update
+    sudo apt-get --yes install yarn
 }
 
 function install_catapult_rest() {
-	# Install REST API
-	cd && git clone https://github.com/nemtech/catapult-rest.git
-	cd catapult-rest/
-	export HASHING_FUNCTION=sha3
-	./yarn_setup.sh
-	cd rest/
-	yarn build
+    # Install REST API
+    cd && git clone https://github.com/nemtech/catapult-rest.git
+    cd catapult-rest/
+    export HASHING_FUNCTION=sha3
+    ./yarn_setup.sh
+    cd rest/
+    yarn build
 }
 
 function init_seed() {
-	clear
-	echo
+    clear
+    echo
     echo "+================================================================+"
-	echo "|  Generate GENESIS keys and initialize CATAPULT seed? [y/n]"
-	echo "|  CATAPULT version: ${CAT_VER}"
+    echo "|  Generate GENESIS keys and initialize CATAPULT seed? [y/n]"
+    echo "|  CATAPULT version: ${CAT_VER}"
     echo "+================================================================+"
-	echo
-	read DOINSTALL
-	if [[ $DOINSTALL =~ "y" ]] || [[ $DOINSTALL =~ "Y" ]] ; then
-		generate_accounts
-		initialize_seed
-	fi
+    echo
+    read DOINSTALL
+    if [[ $DOINSTALL =~ "y" ]] || [[ $DOINSTALL =~ "Y" ]] ; then
+        generate_accounts
+        initialize_seed
+    fi
 }
 
 function generate_accounts() {
-	clear
-	echo
+    clear
+    echo
     echo "+================================================================+"
-	echo "|       How many accounts you need? [3-10]"
+    echo "|       How many accounts you need? [3-10]"
     echo "+================================================================+"
-	echo
-	read ACCOUNT_COUNT
-	# Generate 3 accounts for "nemesis_signer" , "node owner" and "REST owner"!!!
-	# Generate 3 additional accounts for "api owner", peer1 owner" and "peer2 owner"!!!
-	cd /opt/catapult
-	# mkdir catapult-node
-	# catapult-node && mkdir data && mkdir nemesis && mkdir resources && mkdir scripts && mkdir seed
-	/opt/catapult/bin/catapult.tools.address -g ${ACCOUNT_COUNT} --network mijin | tee /opt/catapult/nemesis_signer.txt
+    echo
+    read ACCOUNT_COUNT
+    # Generate 3 accounts for "nemesis_signer" , "node owner" and "REST owner"!!!
+    # Generate 3 additional accounts for "api owner", peer1 owner" and "peer2 owner"!!!
+    cd /opt/catapult
+    # mkdir catapult-node
+    # catapult-node && mkdir data && mkdir nemesis && mkdir resources && mkdir scripts && mkdir seed
+    /opt/catapult/bin/catapult.tools.address -g ${ACCOUNT_COUNT} --network mijin | tee /opt/catapult/nemesis_signer.txt
     cd /opt/catapult
     mkdir nemesis && mkdir data && mkdir tmp
 }
 
 function initialize_seed() {
-	cd ${HOME}/catapult/scripts
-	git clone https://github.com/superhow/cat-config.git
-	
-	# First private and public keys from the file ~/catapult/nemesis_signer.txt --local (local node) --dual (peer & api in one)
-	cd /opt/catapult
-	# zsh scripts/cat-config/reset.sh --local dual ~/catapult <private_key> <public_key>
+    cd ${HOME}/catapult/scripts
+    git clone https://github.com/superhow/cat-config.git
+    
+    # First private and public keys from the file ~/catapult/nemesis_signer.txt --local (local node) --dual (peer & api in one)
+    cd /opt/catapult
+    # zsh scripts/cat-config/reset.sh --local dual ~/catapult <private_key> <public_key>
 }
 
 # Need to make changes to the configuration files - catapult/recources change the necessary parameters.
