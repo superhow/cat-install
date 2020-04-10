@@ -2,7 +2,7 @@
 # Install and build Symbol catapult server and dependancies interactive script version v1.0
 # Copyright (c) 2020 superhow, ministras, SUPER HOW UAB licensed under the GNU Lesser General Public License v3
 
-SCRIPT_VER=1.H
+SCRIPT_VER=1.I
 SSH_PORT=22
 CAT_VER=0.9.3.2
 cmake_ver=3.17.0
@@ -20,7 +20,7 @@ function print_menu() {
     echo "+================================================================+"
     echo "|   Symbol CATAPULT install and build script by SUPER HOW?"
     echo "|   - build and install all Symbol CATAPULT dependancies"
-    echo "|   - build and install Symbol CATAPULT ${CAT_VER}"
+    echo "|   - build and install Symbol CATAPULT v${CAT_VER}"
     echo "|   - generate Symbol CATAPULT seed"
     echo "|+"
     echo "|   Script to be run by limited user, will need sudo rights"
@@ -145,7 +145,7 @@ function install_boost() {
     rm boost_${boost_v}.tar.gz
     mkdir $HOME/boost 
     sudo -E mv $HOME/boost /opt/boost
-    cd boost_${boost_v}
+    cd boost_${boost_v}/
     ./bootstrap.sh --prefix=/opt/boost
     ./b2 --prefix=/opt/boost --without-python -j $(nproc) stage release
     ./b2 --prefix=/opt/boost --without-python install
@@ -177,7 +177,7 @@ function build_dependancies() {
 function build_gtest() {
 	# Gtest
 	cd && git clone https://github.com/google/googletest.git
-	cd googletest
+	cd googletest/
 	git checkout release-1.8.1
 	mkdir _build && cd _build
 	cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON ..
@@ -188,7 +188,7 @@ function build_gtest() {
 function build_benchmark() {
 	# Google benchmark
 	cd && git clone https://github.com/google/benchmark.git
-	cd benchmark
+	cd benchmark/
 	git checkout v1.5.0
 	mkdir _build && cd _build
 	cmake -DCMAKE_BUILD_TYPE=Release -DBENCHMARK_ENABLE_GTEST_TESTS=OFF ..
@@ -200,7 +200,7 @@ function build_mongoc() {
 	# Mongo driver mongo-c
 	# cd && sudo apt -y install libmongoc-1.0-0 libbson-1.0
 	cd && git clone https://github.com/mongodb/mongo-c-driver.git
-	cd mongo-c-driver
+	cd mongo-c-driver/
 	git checkout 1.15.1
 	mkdir _build && cd _build
 	cmake -DENABLE_AUTOMATIC_INIT_AND_CLEANUP=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local ..
@@ -211,7 +211,7 @@ function build_mongoc() {
 function build_mongocxx() {
 	# Mongo driver mongo-c++
 	cd && git clone https://github.com/nemtech/mongo-cxx-driver.git
-	cd mongo-cxx-driver
+	cd mongo-cxx-driver/
 	git checkout r3.4.0-nem
 	#TODO: find out why do we need maxAwaitTimeMS patch...
 	#sed -i 's/kvp("maxAwaitTimeMS", count)/kvp("maxAwaitTimeMS", static_cast<int64_t>(count))/' src/mongocxx/options/change_stream.cpp
@@ -224,8 +224,8 @@ function build_mongocxx() {
 
 function build_zmq() {
 	# ZMQ libzmq
-	cd && git clone git://github.com/zeromq/libzmq.git
-	cd libzmq
+	cd && git clone https://github.com/zeromq/libzmq.git
+	cd libzmq/
 	git checkout v4.3.2
 	mkdir _build && cd _build
 	cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local ..
@@ -234,7 +234,7 @@ function build_zmq() {
 
 	# ZMQ cppzmq
 	cd && git clone https://github.com/zeromq/cppzmq.git
-	cd cppzmq
+	cd cppzmq/
 	git checkout v4.4.1
 	mkdir _build && cd _build
 	cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local ..
@@ -245,9 +245,10 @@ function build_zmq() {
 function build_rocksdb() {
 	# RocksDB
 	cd && git clone https://github.com/nemtech/rocksdb.git
-	cd rocksdb
+	cd rocksdb/
 	git checkout v6.6.4-nem
-	# mkdir _build && cd _build
+	mkdir _build
+	# && cd _build
 	# cmake -DCMAKE_BUILD_TYPE=Release -DWITH_TESTS=OFF . -DCMAKE_INSTALL_PREFIX=/usr/local ..
 	# make
 	sudo make install-shared
@@ -275,7 +276,7 @@ function build_catapult() {
 function build_catapult_superhow_9_3_2() {
 	# CATAPULT server
 	cd && git clone https://bitbucket.org/superhow/catapult-server.git -b release
-	cd catapult-server
+	cd catapult-server/
 	export HASHING_FUNCTION=sha3
 	mkdir build && cd build # replacing _build to build. for future scripts
 	#mkdir _build && cd _build
@@ -290,7 +291,7 @@ function build_catapult_server() {
 	sudo -E mv $HOME/catapult /opt/catapult
 
 	cd && git clone https://github.com/nemtech/catapult-server.git
-	cd catapult-server
+	cd catapult-server/
 	git checkout v${CAT_VER}
 	export HASHING_FUNCTION=sha3
 
@@ -344,10 +345,10 @@ function install_node_js() {
 function install_catapult_rest() {
 	# Install REST API
 	cd && git clone https://github.com/nemtech/catapult-rest.git
-	cd catapult-rest
+	cd catapult-rest/
 	export HASHING_FUNCTION=sha3
 	./yarn_setup.sh
-	cd rest
+	cd rest/
 	yarn build
 }
 
