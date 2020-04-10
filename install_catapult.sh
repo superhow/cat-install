@@ -2,7 +2,7 @@
 # Install and build Symbol catapult server and dependancies interactive script version v1.0
 # Copyright (c) 2020 superhow, ministras, SUPER HOW UAB licensed under the GNU Lesser General Public License v3
 
-SCRIPT_VER=1.F
+SCRIPT_VER=1.G
 SSH_PORT=22
 CAT_VER=0.9.3.2
 cd
@@ -102,13 +102,13 @@ function install_dependancies() {
     sudo apt-get --yes install libtool libssl-dev libatomic-ops-dev libunwind-dev libgflags-dev libsnappy-dev libxml2-dev libxslt-dev screen zsh xz-utils
 	#TODO patikrinti ar sitie vis dar reikalingi: libatomic-ops-dev libunwind-dev libgflags-dev libsnappy-dev libxml2-dev libxslt-dev
     #Install new version of GCC v9.2: https://linuxize.com/post/how-to-install-gcc-compiler-on-ubuntu-18-04/
-    sudo apt-get --yes install software-properties-common
-    sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
-    sudo add-apt-repository --yes ppa:deadsnakes/ppa
-    sudo apt-get --yes install gcc-9 g++-9 python3.7
-    sudo apt-get --yes autoremove
+    sudo -E apt-get --yes install software-properties-common
+    sudo -E add-apt-repository --yes ppa:ubuntu-toolchain-r/test
+    sudo -E add-apt-repository --yes ppa:deadsnakes/ppa
+    sudo -E apt-get --yes install gcc-9 g++-9 python3.7
+    sudo -E apt-get --yes autoremove
     #register priority default GCC versions
-    sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 90 --slave /usr/bin/g++ g++ /usr/bin/g++-9 --slave /usr/bin/gcov gcov /usr/bin/gcov-9
+    sudo -E update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 90 --slave /usr/bin/g++ g++ /usr/bin/g++-9 --slave /usr/bin/gcov gcov /usr/bin/gcov-9
     #to fall back to native GCC: 
     #sudo update-alternatives --config gcc
 }
@@ -147,7 +147,7 @@ function install_boost() {
     tar -xzf boost_${boost_v}.tar.gz
     rm boost_${boost_v}.tar.gz
     mkdir $HOME/boost 
-    sudo mv $HOME/boost /opt/boost
+    sudo -E mv $HOME/boost /opt/boost
     cd boost_${boost_v}
     ./bootstrap.sh --prefix=/opt/boost # bootstrapinam i /opt/boost
     ./b2 --prefix=/opt/boost --without-python -j $(nproc) stage release # bootstrapinam i /opt/boost
@@ -292,7 +292,7 @@ function build_catapult_server_9_3_2() {
 	export HASHING_FUNCTION=sha3
 	
 	mkdir $HOME/catapult 
-	sudo mv $HOME/catapult /opt/catapult
+	sudo -E mv $HOME/catapult /opt/catapult
 	
 	#mkdir build && cd build # replacing _build to build. for future scripts
 	mkdir _build && cd _build
@@ -335,7 +335,7 @@ function install_node_js() {
 	cd
 	curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
 	sudo apt-get --yes install nodejs
-	curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+	curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | sudo -E apt-key add -
 	echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
 	sudo apt-get update
 	sudo apt-get --yes install yarn
@@ -375,11 +375,11 @@ function generate_accounts() {
 	read ACCOUNT_COUNT
 	# Generate 3 accounts for "nemesis_signer" , "node owner" and "REST owner"!!!
 	# Generate 3 additional accounts for "api owner", peer1 owner" and "peer2 owner"!!!
-	cd /opt/catapult-server
+	cd /opt/catapult
 	# mkdir catapult-node
 	# catapult-node && mkdir data && mkdir nemesis && mkdir resources && mkdir scripts && mkdir seed
-	/opt/catapult-server/bin/catapult.tools.address -g ${ACCOUNT_COUNT} --network mijin | tee /opt/catapult-server/nemesis_signer.txt
-    cd /opt/catapult-server
+	/opt/catapult/bin/catapult.tools.address -g ${ACCOUNT_COUNT} --network mijin | tee /opt/catapult/nemesis_signer.txt
+    cd /opt/catapult
     mkdir nemesis && mkdir data && mkdir tmp
 }
 
@@ -387,51 +387,40 @@ function initialize_seed() {
 	cd ${HOME}/catapult/scripts
 	git clone https://github.com/superhow/cat-config.git
 	
-	# First private and public keys from the file ~/catapult-node/nemesis_signer.txt --local (local node) --dual (peer & api in one)
-	cd /opt/catapult-server
-
-	# zsh scripts/cat-config/reset.sh --local dual ~/catapult-node <private_key> <public_key>
+	# First private and public keys from the file ~/catapult/nemesis_signer.txt --local (local node) --dual (peer & api in one)
+	cd /opt/catapult
+	# zsh scripts/cat-config/reset.sh --local dual ~/catapult <private_key> <public_key>
 }
 
-# You need to make changes to the configuration files - catapult-node/recources change the necessary parameters.
-#
+# Need to make changes to the configuration files - catapult/recources change the necessary parameters.
 # 1.
 # config-harvesting.properties
-#       harvesterPrivateKey = <PRIVATE key of the FIRST address from the file catapult-node/harvester_addresses.txt>
+#       harvesterPrivateKey = <FIRST PRIVATE key from the file catapult/harvester_addresses.txt>
 # 2.
 # config-node.properties
-#
 #       enableSingleThreadPool = false
-#       friendlyName =
 # 3.
 # config-user.properties
 #       [account]
-#
-#       #keys should look like 3485D98EFD7EB07ADAFCFD1A157D89DE2796A95E780813C0258AF3F5F84ED8CB
-#       bootPrivateKey = <PRIVATE key of the SECOND address from the file catapult-node/harvester_addresses.txt>
+#       bootPrivateKey = <SECOND PRIVATE key from the file catapult/harvester_addresses.txt>
 #       shouldAutoDetectDelegatedHarvesters = true
-#
 #       [storage]
-#
 #       dataDirectory = ../data
 #       pluginsDirectory =
-#
 # 4.
-#       "publicKey": <PUBLIC key of the SECOND address from the file catapult-node/harvester_addresses.txt>
-#
+#       "publicKey": <FIRST PUBLIC key from the file catapult/harvester_addresses.txt>
 # 5.
 # peer-p2p.json
-#       "publicKey": <PUBLIC key of the SECOND address from the file catapult-node/harvester_addresses.txt>
+#       "publicKey": <SECOND PUBLIC key from the file catapult/harvester_addresses.txt>
 
 # Configure REST API
 # 1.
 # catapult-rest/rest/resources/rest.json
-#       "clientPrivateKey": <PRIVATE key of the THIRD address from the file catapult-node/harvester_addresses.txt
-#
+#       "clientPrivateKey": <THIRD PRIVATE key from the file catapult/harvester_addresses.txt
 #       "apiNode": {
 #           "host": "127.0.0.1",
 #           "port": 7900,
-#           "publicKey": <PUBLIC key of the SECOND address from the file catapult-node/harvester_addresses.txt>,
+#           "publicKey": <SECOND PUBLIC key from the file catapult/harvester_addresses.txt>,
 #           "timeout": 1000
 # },
 
