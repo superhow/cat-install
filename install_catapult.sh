@@ -2,7 +2,7 @@
 # Install and build Symbol catapult server and dependancies interactive script version v1.0
 # Copyright (c) 2020 superhow, ministras, SUPER HOW UAB licensed under the GNU Lesser General Public License v3
 
-SCRIPT_VER=1.K
+SCRIPT_VER=1.L
 SSH_PORT=22
 CAT_VER=0.9.3.2
 cmake_ver=3.17.0
@@ -428,71 +428,166 @@ function initialize_seed() {
 
 # # === Firewall ===
 # function firewall_setup() {
-# 	echo "********** FIREWALL SETUP **************"
-# 	sudo apt-get install -y ufw
-# 	#sudo ufw allow OpenSSH
-# 	sudo ufw default deny
-# 	#sudo ufw allow ssh/tcp
-# 	#sudo ufw limit ssh/tcp
-# 	sudo ufw logging on
-# 	#sudo ufw allow 22
-# 	sudo ufw limit $SSH_PORT/tcp
-# 	#sudo ufw limit OpenSSH
-# 	echo "y" | sudo ufw enable
-# 	#sudo ufw status
+# echo "********** FIREWALL SETUP **************"
+# sudo apt-get install -y ufw
+# #sudo ufw allow OpenSSH
+# sudo ufw default deny
+# #sudo ufw allow ssh/tcp
+# #sudo ufw limit ssh/tcp
+# sudo ufw logging on
+# #sudo ufw allow 22
+# sudo ufw limit $SSH_PORT/tcp
+# #sudo ufw limit OpenSSH
+# echo "y" | sudo ufw enable
+# #sudo ufw status
 # }
 #
 # function change_ssh_port() {
-# 	echo "Do you want to change SSH port? [y/n]"
-# 	read DOSSHPORT
-# 	if [[ $DOSSHPORT =~ "y" ]] || [[ $DOSSHPORT =~ "Y" ]] ; then
-# 		sudo nano /etc/ssh/sshd_config
-# 	# ---  surasti #port.. ir nuimti # ir pakeisti porta i
-# 	# ---  port 4513
-# 		sudo systemctl restart ssh
-# 	fi
+# echo "Do you want to change SSH port? [y/n]"
+# read DOSSHPORT
+# if [[ $DOSSHPORT =~ "y" ]] || [[ $DOSSHPORT =~ "Y" ]] ; then
+# sudo nano /etc/ssh/sshd_config
+# # ---  surasti #port.. ir nuimti # ir pakeisti porta i
+# # ---  port 4513
+# sudo systemctl restart ssh
+# fi
 # }
+
+#********** PROXY SETTINGS ***************
+########## NPM configuration ##########
+#
+#npm config set proxy http://username:password@host:port
+#npm config set https-proxy http://username:password@host:port
+#
+#Or you can edit directly your ~/.npmrc file:
+#proxy=http://username:password@host:port
+#https-proxy=http://username:password@host:port
+#https_proxy=http://username:password@host:port
+
+########## Yarn configuration ##########
+#
+#yarn config set proxy http://username:password@host:port
+#yarn config set https-proxy http://username:password@host:port
+
+########## Git configuration ##########
+#
+#git config --global http.proxy http://username:password@host:port
+#git config --global https.proxy http://username:password@host:port
+#
+# Or you can edit directly your ~/.gitconfig file:
+#[http]
+#        proxy = http://username:password@host:port
+#[https]
+#        proxy = http://username:password@host:port
+
+########## Maven configuration ##########
+#
+# Edit the proxies session in your ~/.m2/settings.xml file:
+#
+#<proxies>
+#    <proxy>
+#        <id>id</id>
+#        <active>true</active>
+#        <protocol>http</protocol>
+#        <username>username</username>
+#        <password>password</password>
+#        <host>host</host>
+#        <port>port</port>
+#        <nonProxyHosts>local.net|some.host.com</nonProxyHosts>
+#    </proxy>
+#</proxies>
+
+########## Maven Wrapper ##########
+#
+#Create a new file .mvn/jvm.config inside the project folder and set the properties accordingly:
+#
+#-Dhttp.proxyHost=host 
+#-Dhttp.proxyPort=port 
+#-Dhttps.proxyHost=host 
+#-Dhttps.proxyPort=port 
+#-Dhttp.proxyUser=username 
+#-Dhttp.proxyPassword=password
+
+########## Gradle configuration ##########
+#
+#Add the below in your gradle.properties file and in your gradle/wrapper/gradle-wrapper.properties file if you are downloading the wrapper over a proxy
+#
+#If you want to set these properties globally then add it in USER_HOME/.gradle/gradle.properties file
+#
+## Proxy setup
+#systemProp.proxySet="true"
+#systemProp.http.keepAlive="true"
+#systemProp.http.proxyHost=host
+#systemProp.http.proxyPort=port
+#systemProp.http.proxyUser=username
+#systemProp.http.proxyPassword=password
+#systemProp.http.nonProxyHosts=local.net|some.host.com
+#
+#systemProp.https.keepAlive="true"
+#systemProp.https.proxyHost=host
+#systemProp.https.proxyPort=port
+#systemProp.https.proxyUser=username
+#systemProp.https.proxyPassword=password
+#systemProp.https.nonProxyHosts=local.net|some.host.com
+## end of proxy setup
+
+########## Docker ##########
+#
+#Depending on your OS, you have to edit a specific file (/etc/sysconfig/docker or /etc/default/docker).
+#Then, you have to restart the docker service with: sudo service docker restart.
+#
+#It will not apply to systemd. https://docs.docker.com/config/daemon/systemd/.
+#Docker with docker-machine
+#
+#You can create your docker-machine with:
+#docker-machine create -d virtualbox \
+#    --engine-env HTTP_PROXY=http://username:password@host:port \
+#    --engine-env HTTPS_PROXY=http://username:password@host:port \
+#    default
+#
+#Or you can edit the file ~/.docker/machine/machines/default/config.json.
+#
 
 while [[ $DOACTION != "q" ]]
 do
-	print_menu
-	echo "*********************************"
-	read DOACTION
-	echo "*********************************"
+    print_menu
+    echo "*********************************"
+    read DOACTION
+    echo "*********************************"
 
-	if [[ $DOACTION == "1" ]] ; then
-		build_base
-	fi
-	if [[ $DOACTION == "2" ]] ; then
-		build_dependancies
-	fi
-	if [[ $DOACTION == "3" ]] ; then
-		build_catapult
-	fi
-	if [[ $DOACTION == "4" ]] ; then
-		install_rest
-	fi
-	if [[ $DOACTION == "5" ]] ; then
-		init_seed
-	fi
-	if [[ $DOACTION == "9" ]] ; then
-		do_firewall_and_ssh
-	fi
-	if [[ $DOACTION == "0" ]] ; then
-		do_system_update
-	fi
-	if [[ $DOACTION == "80" ]] ; then
-		hostname -a
-		hostname -i
-		hostname -I
-	fi
-	if [[ $DOACTION == "91" ]] ; then
-		sudo reboot
-	fi
-	if [[ $DOACTION == "92" ]] ; then
-		sudo shutdown -h now
-	fi
-	if [[ $DOACTION == "100" ]] ; then
-		print_menu
-	fi
+    if [[ $DOACTION == "1" ]] ; then
+        build_base
+    fi
+    if [[ $DOACTION == "2" ]] ; then
+        build_dependancies
+    fi
+    if [[ $DOACTION == "3" ]] ; then
+        build_catapult
+    fi
+    if [[ $DOACTION == "4" ]] ; then
+        install_rest
+    fi
+    if [[ $DOACTION == "5" ]] ; then
+        init_seed
+    fi
+    if [[ $DOACTION == "9" ]] ; then
+        do_firewall_and_ssh
+    fi
+    if [[ $DOACTION == "0" ]] ; then
+        do_system_update
+    fi
+    if [[ $DOACTION == "80" ]] ; then
+        hostname -a
+        hostname -i
+        hostname -I
+    fi
+    if [[ $DOACTION == "91" ]] ; then
+        sudo reboot
+    fi
+    if [[ $DOACTION == "92" ]] ; then
+        sudo shutdown -h now
+    fi
+    if [[ $DOACTION == "100" ]] ; then
+        print_menu
+    fi
 done
