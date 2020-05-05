@@ -2,7 +2,8 @@
 # Install and build Symbol catapult server and dependancies interactive script version v1.0
 # Copyright (c) 2020 superhow, ministras, SUPER HOW UAB licensed under the GNU Lesser General Public License v3
 
-SCRIPT_VER=1.L
+set -ex
+SCRIPT_VER=1.M
 SSH_PORT=22
 CAT_VER=0.9.3.2
 cmake_ver=3.17.0
@@ -297,7 +298,8 @@ function build_catapult_server() {
     #mkdir build && cd build # replacing _build to build. for future scripts
     mkdir _build && cd _build
     #cmake -DBOOST_ROOT=/opt/boost -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/catapult -G Ninja ..
-    cmake -DBOOST_ROOT=/opt/boost -DCMAKE_BUILD_TYPE=Release -DCMAKE_BINARY_DIR=/opt/catapult -G Ninja ..
+    #-DCMAKE_BINARY_DIR=/opt/catapult
+    cmake -DBOOST_ROOT=/opt/boost -DCMAKE_BUILD_TYPE=Release -G Ninja ..
     # bootstrapinam boost root i /opt/boost, install i /opt/catapult reikia pabandyti
     ninja publish
     ninja -j $(nproc)
@@ -322,7 +324,7 @@ function install_rest() {
 }
 
 function install_mongodb() {
-    # Install MongoDB. MANDATORY
+    # Install MongoDB. MANDATORY only API
     cd
     sudo apt-get update
     sudo apt-get --yes install mongodb
@@ -344,8 +346,9 @@ function install_node_js() {
 
 function install_catapult_rest() {
     # Install REST API
-    cd && git clone https://github.com/nemtech/catapult-rest.git
+    cd && git clone https://github.com/superhow/catapult-rest.git
     cd catapult-rest/
+    git checkout v0.7.24
     export HASHING_FUNCTION=sha3
     ./yarn_setup.sh
     cd rest/
