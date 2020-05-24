@@ -2,7 +2,7 @@
 # Install and build Symbol catapult server and dependancies interactive script version v1.0
 # Copyright (c) 2020 superhow, ministras, SUPER HOW UAB licensed under the GNU Lesser General Public License v3
 
-#set -ex
+set -e
 SCRIPT_VER=1.M
 SSH_PORT=22
 CAT_VER=0.9.3.2
@@ -55,8 +55,7 @@ function print_menu() {
     echo "|                                                                |"
     echo "|  q) Quit                                                       |"
     echo "+================================================================+"
-	echo
-	set -ex
+    echo
 }
 
 function os_version_check() {
@@ -80,12 +79,14 @@ function build_base() {
     if [[ $DOINSTALL =~ "y" ]] || [[ $DOINSTALL =~ "Y" ]] ; then
         # change_ssh_port
         # firewall_setup
-        do_system_update
+        set -x
+	do_system_update
         install_dependancies
         install_cmake
         install_boost
         # echo "Ar viskas gerai?"
         # read ANYKEY
+	set +x
     fi
 }
 
@@ -115,7 +116,7 @@ function install_dependancies() {
 }
 
 function install_cmake() {
-    # CMAKE v3.15.4 or v3.17.0
+    # v3.17.0
     echo
     echo "Installing Cmake ${cmake_ver}"
     echo
@@ -163,7 +164,8 @@ function build_dependancies() {
     echo
     read DOINSTALL
     if [[ $DOINSTALL =~ "y" ]] || [[ $DOINSTALL =~ "Y" ]] ; then
-        sudo apt-get update
+        set -x
+	sudo apt-get update
         build_gtest
         build_benchmark
         build_mongoc
@@ -173,6 +175,7 @@ function build_dependancies() {
         #echo "Ar viskas gerai?"
         #read ANYKEY
         #build_catapult_server_9_3_2
+	set +x
     fi
 }
 
@@ -266,11 +269,13 @@ function build_catapult() {
     echo
     read DOINSTALL
     if [[ $DOINSTALL =~ "y" ]] || [[ $DOINSTALL =~ "Y" ]] ; then
-        sudo apt-get update
+        set -x
+	sudo apt-get update
         build_catapult_server
         #build_catapult_superhow_9_3_2
         echo "All good?"
         read ANYKEY
+	set +x
     fi
 }
 
@@ -316,11 +321,13 @@ function install_rest() {
     echo
     read DOINSTALL
     if [[ $DOINSTALL =~ "y" ]] || [[ $DOINSTALL =~ "Y" ]] ; then
-        install_mongodb
+        set -x
+	install_mongodb
         install_node_js
         echo "All good?"
         read ANYKEY
         install_catapult_rest
+	set +x
     fi
 }
 
@@ -366,8 +373,10 @@ function init_seed() {
     echo
     read DOINSTALL
     if [[ $DOINSTALL =~ "y" ]] || [[ $DOINSTALL =~ "Y" ]] ; then
-        generate_accounts
+        set -x
+	generate_accounts
         initialize_seed
+	set +x
     fi
 }
 
