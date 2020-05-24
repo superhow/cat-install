@@ -3,7 +3,7 @@
 # Copyright (c) 2020 superhow, ministras, SUPER HOW UAB licensed under the GNU Lesser General Public License v3
 
 set -e
-SCRIPT_VER=1.M
+SCRIPT_VER=1.N
 SSH_PORT=22
 CAT_VER=0.9.5.1
 cmake_ver=3.17.0
@@ -84,8 +84,6 @@ function build_base() {
         install_dependancies
         install_cmake
         install_boost
-        # echo "Ar viskas gerai?"
-        # read ANYKEY
 	set +x
     fi
 }
@@ -152,7 +150,7 @@ function install_boost() {
     ./bootstrap.sh --prefix=/opt/boost
     ./b2 --prefix=/opt/boost --without-python -j $(nproc) stage release
     ./b2 --prefix=/opt/boost --without-python install
-	#rm -rf boost_${boost_v}/
+    rm -rf boost_${boost_v}/
 }
 
 function build_dependancies() {
@@ -173,9 +171,6 @@ function build_dependancies() {
         build_mongocxx
         build_zmq
         build_rocksdb
-        #echo "Ar viskas gerai?"
-        #read ANYKEY
-        #build_catapult_server_9_3_2
 	set +x
     fi
 }
@@ -257,8 +252,6 @@ function build_rocksdb() {
     # cmake -DCMAKE_BUILD_TYPE=Release -DWITH_TESTS=OFF . -DCMAKE_INSTALL_PREFIX=/usr/local ..
     # make
     sudo make install-shared
-    #echo "All good?"
-    #read ANYKEY
 }
 
 function build_catapult() {
@@ -273,23 +266,10 @@ function build_catapult() {
         set -x
 	sudo apt-get update
         build_catapult_server
-        #build_catapult_superhow_9_3_2
         echo "All good?"
         read ANYKEY
 	set +x
     fi
-}
-
-function build_catapult_superhow_9_3_2() {
-    # CATAPULT server
-    cd && git clone https://bitbucket.org/superhow/catapult-server.git -b release
-    cd catapult-server/
-    export HASHING_FUNCTION=sha3
-    mkdir build && cd build # replacing _build to build. for future scripts
-    #mkdir _build && cd _build
-    cmake -DBOOST_ROOT=/opt/boost -DCMAKE_BUILD_TYPE=Release -G Ninja ..
-    ninja publish
-    ninja -j $(nproc)
 }
 
 function build_catapult_server() {
@@ -300,7 +280,6 @@ function build_catapult_server() {
     cd && git clone https://github.com/nemtech/catapult-server.git
     cd catapult-server/
     #git checkout v${CAT_VER}
-    export HASHING_FUNCTION=sha3
 
     #mkdir build && cd build # replacing _build to build. for future scripts
     mkdir _build && cd _build
@@ -358,7 +337,6 @@ function install_catapult_rest() {
     cd && git clone https://github.com/nemtech/catapult-rest.git
     cd catapult-rest/
     #git checkout v0.7.24
-    export HASHING_FUNCTION=sha3
     ./yarn_setup.sh
     cd rest/
     yarn build
