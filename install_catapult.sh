@@ -2,7 +2,7 @@
 # Install and build Symbol catapult server and dependancies interactive script version v1.0
 # Copyright (c) 2020 superhow, ministras, SUPER HOW UAB licensed under the GNU Lesser General Public License v3
 
-set -ex
+#set -ex
 SCRIPT_VER=1.M
 SSH_PORT=22
 CAT_VER=0.9.3.2
@@ -56,6 +56,7 @@ function print_menu() {
     echo "|  q) Quit                                                       |"
     echo "+================================================================+"
 	echo
+	set -ex
 }
 
 function os_version_check() {
