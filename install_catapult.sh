@@ -5,7 +5,7 @@
 set -e
 SCRIPT_VER=1.M
 SSH_PORT=22
-CAT_VER=0.9.3.2
+CAT_VER=0.9.5.1
 cmake_ver=3.17.0
 boost_v=1_72_0
 boost_ver=1.72.0
@@ -299,7 +299,7 @@ function build_catapult_server() {
 
     cd && git clone https://github.com/nemtech/catapult-server.git
     cd catapult-server/
-    git checkout v${CAT_VER}
+    #git checkout v${CAT_VER}
     export HASHING_FUNCTION=sha3
 
     #mkdir build && cd build # replacing _build to build. for future scripts
@@ -355,9 +355,9 @@ function install_node_js() {
 
 function install_catapult_rest() {
     # Install REST API
-    cd && git clone https://github.com/superhow/catapult-rest.git
+    cd && git clone https://github.com/nemtech/catapult-rest.git
     cd catapult-rest/
-    git checkout v0.7.24
+    #git checkout v0.7.24
     export HASHING_FUNCTION=sha3
     ./yarn_setup.sh
     cd rest/
