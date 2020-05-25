@@ -165,7 +165,8 @@ function build_dependancies() {
     if [[ $DOINSTALL =~ "y" ]] || [[ $DOINSTALL =~ "Y" ]] ; then
         set -x
 	sudo apt-get update
-        build_gtest
+        mkdir $HOME/source
+	build_gtest
         build_benchmark
         build_mongoc
         build_mongocxx
@@ -177,7 +178,7 @@ function build_dependancies() {
 
 function build_gtest() {
     # Gtest
-    cd && git clone https://github.com/google/googletest.git
+    cd $HOME/source/ && git clone https://github.com/google/googletest.git
     cd googletest/
     git checkout release-1.8.1
     mkdir _build && cd _build
@@ -188,7 +189,7 @@ function build_gtest() {
 
 function build_benchmark() {
     # Google benchmark
-    cd && git clone https://github.com/google/benchmark.git
+    cd $HOME/source/ && git clone https://github.com/google/benchmark.git
     cd benchmark/
     git checkout v1.5.0
     mkdir _build && cd _build
@@ -199,7 +200,7 @@ function build_benchmark() {
 
 function build_mongoc() {
     # Mongo driver mongo-c
-    cd && git clone https://github.com/mongodb/mongo-c-driver.git
+    cd $HOME/source/ && git clone https://github.com/mongodb/mongo-c-driver.git
     cd mongo-c-driver/
     git checkout 1.15.1
     mkdir _build && cd _build
@@ -210,7 +211,7 @@ function build_mongoc() {
 
 function build_mongocxx() {
     # Mongo driver mongo-c++
-    cd && git clone https://github.com/nemtech/mongo-cxx-driver.git
+    cd $HOME/source/ && git clone https://github.com/nemtech/mongo-cxx-driver.git
     cd mongo-cxx-driver/
     git checkout r3.4.0-nem
     #TODO: find out why do we need maxAwaitTimeMS patch...
@@ -224,7 +225,7 @@ function build_mongocxx() {
 
 function build_zmq() {
     # ZMQ libzmq
-    cd && git clone https://github.com/zeromq/libzmq.git
+    cd $HOME/source/ && git clone https://github.com/zeromq/libzmq.git
     cd libzmq/
     git checkout v4.3.2
     mkdir _build && cd _build
@@ -233,7 +234,7 @@ function build_zmq() {
     sudo make install
 
     # ZMQ cppzmq
-    cd && git clone https://github.com/zeromq/cppzmq.git
+    cd $HOME/source/ && git clone https://github.com/zeromq/cppzmq.git
     cd cppzmq/
     git checkout v4.4.1
     mkdir _build && cd _build
@@ -244,7 +245,7 @@ function build_zmq() {
 
 function build_rocksdb() {
     # RocksDB
-    cd && git clone https://github.com/nemtech/rocksdb.git
+    cd $HOME/source/ && git clone https://github.com/nemtech/rocksdb.git
     cd rocksdb/
     git checkout v6.6.4-nem
     mkdir _build
@@ -266,8 +267,6 @@ function build_catapult() {
         set -x
 	sudo apt-get update
         build_catapult_server
-        echo "All good?"
-        read ANYKEY
 	set +x
     fi
 }
@@ -277,7 +276,7 @@ function build_catapult_server() {
     mkdir $HOME/catapult 
     sudo -E mv $HOME/catapult /opt/catapult
 
-    cd && git clone https://github.com/nemtech/catapult-server.git
+    cd $HOME/source/ && git clone https://github.com/nemtech/catapult-server.git
     cd catapult-server/
     #git checkout v${CAT_VER}
 
@@ -289,6 +288,11 @@ function build_catapult_server() {
     # bootstrapinam boost root i /opt/boost, install i /opt/catapult reikia pabandyti
     ninja publish
     ninja -j $(nproc)
+    mv $HOME/source/catapult-server/_build/bin /opt/catapult/bin
+    mv $HOME/source/catapult-server/_build/lib /opt/catapult/lib
+    mv $HOME/source/catapult-server/_build/inc /opt/catapult/inc
+    cp $HOME/source/catapult-server/scripts $HOME/catapult/scripts
+    cp $HOME/source/catapult-server/scripts /opt/catapult/scripts
 }
 
 function install_rest() {
@@ -304,8 +308,6 @@ function install_rest() {
         set -x
 	install_mongodb
         install_node_js
-        echo "All good?"
-        read ANYKEY
         install_catapult_rest
 	set +x
     fi
@@ -369,20 +371,18 @@ function generate_accounts() {
     read ACCOUNT_COUNT
     # Generate 3 accounts for "nemesis_signer" , "node owner" and "REST owner"!!!
     # Generate 3 additional accounts for "api owner", peer1 owner" and "peer2 owner"!!!
-    cd /opt/catapult
-    # mkdir catapult-node
+    mkdir $HOME/catapult/
+    cd $HOME/catapult/
     # catapult-node && mkdir data && mkdir nemesis && mkdir resources && mkdir scripts && mkdir seed
-    /opt/catapult/bin/catapult.tools.address -g ${ACCOUNT_COUNT} --network mijin | tee /opt/catapult/nemesis_signer.txt
-    cd /opt/catapult
-    mkdir nemesis && mkdir data && mkdir tmp
+    /opt/catapult/bin/catapult.tools.address -g ${ACCOUNT_COUNT} --network mijin | tee $HOME/catapult/nemesis_signer.txt
 }
 
 function initialize_seed() {
-    cd ${HOME}/catapult/scripts
+    cd $HOME/catapult/scripts
     git clone https://github.com/superhow/cat-config.git
     
     # First private and public keys from the file ~/catapult/nemesis_signer.txt --local (local node) --dual (peer & api in one)
-    cd /opt/catapult
+    cd $HOME/catapult/
     # zsh scripts/cat-config/reset.sh --local dual ~/catapult <private_key> <public_key>
 }
 
