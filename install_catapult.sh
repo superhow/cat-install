@@ -120,6 +120,7 @@ function install_cmake() {
     echo
     echo "Installing Cmake ${cmake_ver}"
     echo
+    cd $HOME/src/
     sudo apt-get --yes --auto-remove purge cmake
     wget https://github.com/Kitware/CMake/releases/download/v${cmake_ver}/cmake-${cmake_ver}.tar.gz
     tar -xzvf cmake-${cmake_ver}.tar.gz
@@ -128,6 +129,7 @@ function install_cmake() {
     ./bootstrap
     make -j $(nproc)
     sudo make install
+    
     echo
     echo "Check CMAKE version:"
     echo
@@ -142,12 +144,14 @@ function install_boost() {
     echo
     echo "Installing BOOST ${boost_ver}"
     echo
-    cd && curl -o boost_${boost_v}.tar.gz -SL https://dl.bintray.com/boostorg/release/${boost_ver}/source/boost_${boost_v}.tar.gz
-    tar -xzf boost_${boost_v}.tar.gz
-    rm boost_${boost_v}.tar.gz
     rm -rf /opt/boost/
     mkdir $HOME/boost 
     sudo -E mv $HOME/boost /opt/boost
+    
+    cd $HOME/src/
+    curl -o boost_${boost_v}.tar.gz -SL https://dl.bintray.com/boostorg/release/${boost_ver}/source/boost_${boost_v}.tar.gz
+    tar -xzf boost_${boost_v}.tar.gz
+    rm boost_${boost_v}.tar.gz
     cd boost_${boost_v}/
     ./bootstrap.sh --prefix=/opt/boost
     ./b2 --prefix=/opt/boost --without-python -j $(nproc) stage release
@@ -172,17 +176,24 @@ function install_openssl() {
     sudo make install
     
     #Configure OpenSSl shared libraries
-    cd /etc/ld.so.conf.d/
-    sudo nano openssl-1.1.1c.conf
-    # enter /usr/local/ssl/lib
-    # exit and save
+    echo "/usr/local/ssl/lib" | sudo tee /etc/ld.so.conf.d/openssl-${openssl_ver}.conf
+    
+    # Reload dynamic link
     sudo ldconfig -v
     
+    # Configure OpenSSL Binary
+    sudo mv /usr/bin/c_rehash /usr/bin/c_rehash.backup
+    sudo mv /usr/bin/openssl /usr/bin/openssl.backup
     
+    sudo nano /etc/environment
+    PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/local/ssl/bin"
+    Ensure to save before you exit.
     
-
+    source /etc/environment
+    echo $PATH
     
-    
+    which openssl
+    openssl version -a
 }
 
 function build_dependancies() {
@@ -265,7 +276,7 @@ function build_zmq() {
     sudo make install
 
     # ZMQ cppzmq
-    cd $HOME/source/ && git clone https://github.com/zeromq/cppzmq.git
+    cd $HOME/src/ && git clone https://github.com/zeromq/cppzmq.git
     cd cppzmq/
     git checkout v4.4.1
     mkdir _build && cd _build
