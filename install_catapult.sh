@@ -144,13 +144,14 @@ function install_boost() {
     cd && curl -o boost_${boost_v}.tar.gz -SL https://dl.bintray.com/boostorg/release/${boost_ver}/source/boost_${boost_v}.tar.gz
     tar -xzf boost_${boost_v}.tar.gz
     rm boost_${boost_v}.tar.gz
+    rm -rf /opt/boost/
     mkdir $HOME/boost 
     sudo -E mv $HOME/boost /opt/boost
     cd boost_${boost_v}/
     ./bootstrap.sh --prefix=/opt/boost
     ./b2 --prefix=/opt/boost --without-python -j $(nproc) stage release
     ./b2 --prefix=/opt/boost --without-python install
-    rm -rf boost_${boost_v}/
+    #rm -rf boost_${boost_v}/
 }
 
 function build_dependancies() {
@@ -165,7 +166,7 @@ function build_dependancies() {
     if [[ $DOINSTALL =~ "y" ]] || [[ $DOINSTALL =~ "Y" ]] ; then
         set -x
 	sudo apt-get update
-        mkdir $HOME/source
+	[ -d $HOME/source ] && echo "Directory Exists" || mkdir $HOME/source
 	build_gtest
         build_benchmark
         build_mongoc
@@ -273,8 +274,8 @@ function build_catapult() {
 
 function build_catapult_server() {
     # Build CATAPULT server
-    mkdir $HOME/catapult 
-    sudo -E mv $HOME/catapult /opt/catapult
+    [ -d /opt/catapult ] && echo "Directory Exists" || mkdir $HOME/catapult
+    [ -d /opt/catapult ] && echo "Directory Exists" || sudo -E mv $HOME/catapult /opt/catapult
 
     cd $HOME/source/ && git clone https://github.com/nemtech/catapult-server.git
     cd catapult-server/
@@ -371,7 +372,6 @@ function generate_accounts() {
     read ACCOUNT_COUNT
     # Generate 3 accounts for "nemesis_signer" , "node owner" and "REST owner"!!!
     # Generate 3 additional accounts for "api owner", peer1 owner" and "peer2 owner"!!!
-    mkdir $HOME/catapult/
     cd $HOME/catapult/
     # catapult-node && mkdir data && mkdir nemesis && mkdir resources && mkdir scripts && mkdir seed
     /opt/catapult/bin/catapult.tools.address -g ${ACCOUNT_COUNT} --network mijin | tee $HOME/catapult/nemesis_signer.txt
