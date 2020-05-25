@@ -186,12 +186,10 @@ function install_openssl() {
     sudo mv /usr/bin/openssl /usr/bin/openssl.backup
     
     sudo nano /etc/environment
-    PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/local/ssl/bin"
-    Ensure to save before you exit.
+    #PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/local/ssl/bin"
     
     source /etc/environment
     echo $PATH
-    
     which openssl
     openssl version -a
 }
