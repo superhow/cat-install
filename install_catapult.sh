@@ -9,7 +9,9 @@ CAT_VER=0.9.5.1
 cmake_ver=3.17.0
 boost_v=1_72_0
 boost_ver=1.72.0
+openssl_ver=1.1.1g
 cd
+[ -d $HOME/src ] && echo "Directory src Exists" || mkdir $HOME/src
 # echo "Be sure to use screen before running. There will be several prompts for sudo password"
 # echo "This script is prepared to be executed with user 'root' or any other user"
 
@@ -98,8 +100,8 @@ function do_system_update() {
 }
 
 function install_dependancies() {
-    sudo apt-get --yes install autoconf automake build-essential curl cmake git gcc g++ gdb mc ninja-build pkg-config python3 python3-ply python-dev
-    sudo apt-get --yes install libtool libssl-dev libatomic-ops-dev libunwind-dev libgflags-dev libsnappy-dev libxml2-dev libxslt-dev screen zsh xz-utils
+    sudo apt-get --yes install autoconf automake build-essential checkinstall curl cmake git gcc g++ gdb mc ninja-build pkg-config python3 python3-ply python-dev
+    sudo apt-get --yes install libtool libssl-dev libatomic-ops-dev libunwind-dev libgflags-dev libsnappy-dev libxml2-dev libxslt-dev screen zlib1g-dev zsh xz-utils
     #TODO patikrinti ar sitie vis dar reikalingi: libatomic-ops-dev libunwind-dev libgflags-dev libsnappy-dev libxml2-dev libxslt-dev
     #Install new version of GCC v9.2: https://linuxize.com/post/how-to-install-gcc-compiler-on-ubuntu-18-04/
     sudo -E apt-get --yes install software-properties-common
@@ -153,6 +155,36 @@ function install_boost() {
     #rm -rf boost_${boost_v}/
 }
 
+function install_openssl() {
+    # OpenSSL v1.1.1g
+    echo
+    echo "Installing OpenSSL ${openssl_ver}"
+    echo
+    openssl version -a
+    cd $HOME/src/
+    wget https://www.openssl.org/source/openssl-${openssl_ver}.tar.gz
+    tar -xf openssl-${openssl_ver}.tar.gz
+    rm openssl-${openssl_ver}.tar.gz
+    cd openssl-${openssl_ver}
+    ./config --prefix=/usr/local/ssl --openssldir=/usr/local/ssl shared zlib
+    make
+    make test
+    sudo make install
+    
+    #Configure OpenSSl shared libraries
+    cd /etc/ld.so.conf.d/
+    sudo nano openssl-1.1.1c.conf
+    # enter /usr/local/ssl/lib
+    # exit and save
+    sudo ldconfig -v
+    
+    
+    
+
+    
+    
+}
+
 function build_dependancies() {
     clear
     echo
@@ -165,7 +197,6 @@ function build_dependancies() {
     if [[ $DOINSTALL =~ "y" ]] || [[ $DOINSTALL =~ "Y" ]] ; then
         set -x
 	sudo apt-get update
-	[ -d $HOME/source ] && echo "Directory Exists" || mkdir $HOME/source
 	build_gtest
         build_benchmark
         build_mongoc
@@ -178,7 +209,7 @@ function build_dependancies() {
 
 function build_gtest() {
     # Gtest
-    cd $HOME/source/ && git clone https://github.com/google/googletest.git
+    cd $HOME/src/ && git clone https://github.com/google/googletest.git
     cd googletest/
     git checkout release-1.8.1
     mkdir _build && cd _build
@@ -189,7 +220,7 @@ function build_gtest() {
 
 function build_benchmark() {
     # Google benchmark
-    cd $HOME/source/ && git clone https://github.com/google/benchmark.git
+    cd $HOME/src/ && git clone https://github.com/google/benchmark.git
     cd benchmark/
     git checkout v1.5.0
     mkdir _build && cd _build
@@ -200,7 +231,7 @@ function build_benchmark() {
 
 function build_mongoc() {
     # Mongo driver mongo-c
-    cd $HOME/source/ && git clone https://github.com/mongodb/mongo-c-driver.git
+    cd $HOME/src/ && git clone https://github.com/mongodb/mongo-c-driver.git
     cd mongo-c-driver/
     git checkout 1.15.1
     mkdir _build && cd _build
@@ -211,7 +242,7 @@ function build_mongoc() {
 
 function build_mongocxx() {
     # Mongo driver mongo-c++
-    cd $HOME/source/ && git clone https://github.com/nemtech/mongo-cxx-driver.git
+    cd $HOME/src/ && git clone https://github.com/nemtech/mongo-cxx-driver.git
     cd mongo-cxx-driver/
     git checkout r3.4.0-nem
     #TODO: find out why do we need maxAwaitTimeMS patch...
@@ -225,7 +256,7 @@ function build_mongocxx() {
 
 function build_zmq() {
     # ZMQ libzmq
-    cd $HOME/source/ && git clone https://github.com/zeromq/libzmq.git
+    cd $HOME/src/ && git clone https://github.com/zeromq/libzmq.git
     cd libzmq/
     git checkout v4.3.2
     mkdir _build && cd _build
@@ -245,7 +276,7 @@ function build_zmq() {
 
 function build_rocksdb() {
     # RocksDB
-    cd $HOME/source/ && git clone https://github.com/nemtech/rocksdb.git
+    cd $HOME/src/ && git clone https://github.com/nemtech/rocksdb.git
     cd rocksdb/
     git checkout v6.6.4-nem
     mkdir _build
@@ -276,7 +307,7 @@ function build_catapult_server() {
     [ -d /opt/catapult ] && echo "Directory Exists" || mkdir $HOME/catapult
     [ -d /opt/catapult ] && echo "Directory Exists" || sudo -E mv $HOME/catapult /opt/catapult
 
-    cd $HOME/source/ && git clone https://github.com/nemtech/catapult-server.git
+    cd $HOME/src/ && git clone https://github.com/nemtech/catapult-server.git
     cd catapult-server/
     #git checkout v${CAT_VER}
 
@@ -288,11 +319,11 @@ function build_catapult_server() {
     # bootstrapinam boost root i /opt/boost, install i /opt/catapult reikia pabandyti
     ninja publish
     ninja -j $(nproc)
-    mv $HOME/source/catapult-server/_build/bin /opt/catapult/bin
-    mv $HOME/source/catapult-server/_build/lib /opt/catapult/lib
-    mv $HOME/source/catapult-server/_build/inc /opt/catapult/inc
-    cp $HOME/source/catapult-server/scripts $HOME/catapult/scripts
-    cp $HOME/source/catapult-server/scripts /opt/catapult/scripts
+    mv $HOME/src/catapult-server/_build/bin /opt/catapult/bin
+    mv $HOME/src/catapult-server/_build/lib /opt/catapult/lib
+    mv $HOME/src/catapult-server/_build/inc /opt/catapult/inc
+    cp $HOME/src/catapult-server/scripts $HOME/catapult/scripts
+    cp $HOME/src/catapult-server/scripts /opt/catapult/scripts
 }
 
 function install_rest() {
