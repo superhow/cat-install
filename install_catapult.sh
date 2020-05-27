@@ -3,7 +3,7 @@
 # Copyright (c) 2020 superhow, ministras, SUPER HOW UAB licensed under the GNU Lesser General Public License v3
 
 set -e
-SCRIPT_VER=1.N
+SCRIPT_VER=1.O
 SSH_PORT=22
 CAT_VER=0.9.5.1
 cmake_ver=3.17.0
@@ -354,13 +354,27 @@ function install_rest() {
 }
 
 function install_mongodb() {
-    # Install MongoDB. MANDATORY only API
+    # Remove old MongoDB
     cd
+    sudo systemctl stop mongodb
+    sudo systemctl disable mongodb
+    sudo apt-get -y purge autoremove mongodb
+    sudo rm -r /var/log/mongodb
+    sudo rm -r /var/lib/mongodb
+    
+    # Install MongoDB 4.2. MANDATORY only API
+    curl -sL https://www.mongodb.org/static/pgp/server-4.2.asc | sudo -E apt-key add -
+    echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.2.list
     sudo apt-get update
-    sudo apt-get --yes install mongodb
-    sudo systemctl start mongodb
-    sudo systemctl enable mongodb
-    sudo systemctl status mongodb
+    sudo apt-get install -y mongodb-org
+    echo "mongodb-org hold" | sudo dpkg --set-selections
+    echo "mongodb-org-server hold" | sudo dpkg --set-selections
+    echo "mongodb-org-shell hold" | sudo dpkg --set-selections
+    echo "mongodb-org-mongos hold" | sudo dpkg --set-selections
+    echo "mongodb-org-tools hold" | sudo dpkg --set-selections
+    sudo systemctl start mongod
+    sudo systemctl status mongod
+    sudo systemctl enable mongod    
 }
 
 function install_node_js() {
