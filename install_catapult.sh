@@ -331,8 +331,8 @@ function build_catapult_server() {
     mv $HOME/src/catapult-server/_build/bin /opt/catapult/bin
     mv $HOME/src/catapult-server/_build/lib /opt/catapult/lib
     mv $HOME/src/catapult-server/_build/inc /opt/catapult/inc
-    cp $HOME/src/catapult-server/scripts $HOME/catapult/scripts
-    cp $HOME/src/catapult-server/scripts /opt/catapult/scripts
+    cp -r $HOME/src/catapult-server/scripts $HOME/catapult/scripts
+    cp -r $HOME/src/catapult-server/scripts /opt/catapult/scripts
 }
 
 function install_mongo() {
