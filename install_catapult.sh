@@ -373,8 +373,8 @@ function install_mongodb() {
     echo "mongodb-org-mongos hold" | sudo dpkg --set-selections
     echo "mongodb-org-tools hold" | sudo dpkg --set-selections
     sudo systemctl start mongod
-    sudo systemctl status mongod
     sudo systemctl enable mongod    
+    sudo systemctl status mongod
 }
 
 function install_rest() {
