@@ -12,6 +12,7 @@ boost_ver=1.72.0
 openssl_ver=1.1.1g
 cd
 [ -d $HOME/src ] && echo "Directory src Exists" || mkdir $HOME/src
+[ -d $HOME/catapult ] && echo "Directory catapult Exists" || mkdir $HOME/catapult
 # echo "Be sure to use screen before running. There will be several prompts for sudo password"
 # echo "This script is prepared to be executed with user 'root' or any other user"
 
