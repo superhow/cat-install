@@ -45,7 +45,7 @@ function print_menu() {
     echo "|  3) Step 3: Build Symbol CATAPULT mijin from git               |"
     echo "|  4) Step 4: Build mongodb v4.2.7                               |"
     echo "|  5) Step 5: Build NODE.JS and CATAPULT REST                    |"
-    echo "|  6) Step 5: Generate keys and instialize CATAPULT seed         |"
+    echo "|  6) Step 6: Generate keys and instialize CATAPULT seed         |"
     echo "|  9) Setup Firewall and change SSH port (TODO)                  |"
     echo "|  0) Tool: Just do system update & upgrade                      |"	
     echo "|                                                                |"
@@ -356,7 +356,8 @@ function install_mongodb() {
     cd
     sudo systemctl stop mongodb
     sudo systemctl disable mongodb
-    sudo apt-get -y purge autoremove mongodb
+    sudo apt-get -y remove mongodb
+    sudo apt-get -y autoremove
     sudo rm -r /var/log/mongodb
     sudo rm -r /var/lib/mongodb
     
