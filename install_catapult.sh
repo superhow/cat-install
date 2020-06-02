@@ -86,6 +86,7 @@ function build_base() {
         install_dependancies
         install_cmake
         install_boost
+	#install_openssl
 	set +x
     fi
 }
@@ -318,7 +319,7 @@ function build_catapult_server() {
 
     cd $HOME/src/ && git clone https://github.com/nemtech/catapult-server.git
     cd catapult-server/
-    #git checkout v${CAT_VER}
+    git checkout v${CAT_VER}
 
     #mkdir build && cd build # replacing _build to build. for future scripts
     mkdir _build && cd _build
@@ -335,11 +336,11 @@ function build_catapult_server() {
     cp $HOME/src/catapult-server/scripts /opt/catapult/scripts
 }
 
-function install_rest() {
+function install_mongo() {
     clear
     echo
     echo "+================================================================+"
-    echo "|             Install MONGODB, NODE.JS, CATAPULT REST? [y/n]"
+    echo "|             Install MONGODB? [y/n]"
     echo "|             CATAPULT version: ${CAT_VER}"
     echo "+================================================================+"
     echo
@@ -347,9 +348,7 @@ function install_rest() {
     if [[ $DOINSTALL =~ "y" ]] || [[ $DOINSTALL =~ "Y" ]] ; then
         set -x
 	install_mongodb
-        install_node_js
-        install_catapult_rest
-	set +x
+        set +x
     fi
 }
 
@@ -377,6 +376,24 @@ function install_mongodb() {
     sudo systemctl enable mongod    
 }
 
+function install_rest() {
+    clear
+    echo
+    echo "+================================================================+"
+    echo "|             Install NODE.JS, CATAPULT REST? [y/n]"
+    echo "|             CATAPULT version: ${CAT_VER}"
+    echo "+================================================================+"
+    echo
+    read DOINSTALL
+    if [[ $DOINSTALL =~ "y" ]] || [[ $DOINSTALL =~ "Y" ]] ; then
+        set -x
+	#install_mongodb
+        install_node_js
+        install_catapult_rest
+	set +x
+    fi
+}
+
 function install_node_js() {
     # Install Node.js v10 & yarn for REST API
     cd
@@ -392,7 +409,7 @@ function install_catapult_rest() {
     # Install REST API
     cd && git clone https://github.com/nemtech/catapult-rest.git
     cd catapult-rest/
-    #git checkout v0.7.24
+    git checkout v0.7.20.34
     ./yarn_setup.sh
     cd rest/
     yarn build
@@ -439,38 +456,6 @@ function initialize_seed() {
     # zsh scripts/cat-config/reset.sh --local dual ~/catapult <private_key> <public_key>
 }
 
-# Need to make changes to the configuration files - catapult/recources change the necessary parameters.
-# 1.
-# config-harvesting.properties
-#       harvesterPrivateKey = <FIRST PRIVATE key from the file catapult/harvester_addresses.txt>
-# 2.
-# config-node.properties
-#       enableSingleThreadPool = false
-# 3.
-# config-user.properties
-#       [account]
-#       bootPrivateKey = <SECOND PRIVATE key from the file catapult/harvester_addresses.txt>
-#       shouldAutoDetectDelegatedHarvesters = true
-#       [storage]
-#       dataDirectory = ../data
-#       pluginsDirectory =
-# 4.
-#       "publicKey": <FIRST PUBLIC key from the file catapult/harvester_addresses.txt>
-# 5.
-# peer-p2p.json
-#       "publicKey": <SECOND PUBLIC key from the file catapult/harvester_addresses.txt>
-
-# Configure REST API
-# 1.
-# catapult-rest/rest/resources/rest.json
-#       "clientPrivateKey": <THIRD PRIVATE key from the file catapult/harvester_addresses.txt
-#       "apiNode": {
-#           "host": "127.0.0.1",
-#           "port": 7900,
-#           "publicKey": <SECOND PUBLIC key from the file catapult/harvester_addresses.txt>,
-#           "timeout": 1000
-# },
-
 # # === Firewall ===
 # function firewall_setup() {
 # echo "********** FIREWALL SETUP **************"
@@ -498,101 +483,6 @@ function initialize_seed() {
 # fi
 # }
 
-#********** PROXY SETTINGS ***************
-########## NPM configuration ##########
-#
-#npm config set proxy http://username:password@host:port
-#npm config set https-proxy http://username:password@host:port
-#
-#Or you can edit directly your ~/.npmrc file:
-#proxy=http://username:password@host:port
-#https-proxy=http://username:password@host:port
-#https_proxy=http://username:password@host:port
-
-########## Yarn configuration ##########
-#
-#yarn config set proxy http://username:password@host:port
-#yarn config set https-proxy http://username:password@host:port
-
-########## Git configuration ##########
-#
-#git config --global http.proxy http://username:password@host:port
-#git config --global https.proxy http://username:password@host:port
-#
-# Or you can edit directly your ~/.gitconfig file:
-#[http]
-#        proxy = http://username:password@host:port
-#[https]
-#        proxy = http://username:password@host:port
-
-########## Maven configuration ##########
-#
-# Edit the proxies session in your ~/.m2/settings.xml file:
-#
-#<proxies>
-#    <proxy>
-#        <id>id</id>
-#        <active>true</active>
-#        <protocol>http</protocol>
-#        <username>username</username>
-#        <password>password</password>
-#        <host>host</host>
-#        <port>port</port>
-#        <nonProxyHosts>local.net|some.host.com</nonProxyHosts>
-#    </proxy>
-#</proxies>
-
-########## Maven Wrapper ##########
-#
-#Create a new file .mvn/jvm.config inside the project folder and set the properties accordingly:
-#
-#-Dhttp.proxyHost=host 
-#-Dhttp.proxyPort=port 
-#-Dhttps.proxyHost=host 
-#-Dhttps.proxyPort=port 
-#-Dhttp.proxyUser=username 
-#-Dhttp.proxyPassword=password
-
-########## Gradle configuration ##########
-#
-#Add the below in your gradle.properties file and in your gradle/wrapper/gradle-wrapper.properties file if you are downloading the wrapper over a proxy
-#
-#If you want to set these properties globally then add it in USER_HOME/.gradle/gradle.properties file
-#
-## Proxy setup
-#systemProp.proxySet="true"
-#systemProp.http.keepAlive="true"
-#systemProp.http.proxyHost=host
-#systemProp.http.proxyPort=port
-#systemProp.http.proxyUser=username
-#systemProp.http.proxyPassword=password
-#systemProp.http.nonProxyHosts=local.net|some.host.com
-#
-#systemProp.https.keepAlive="true"
-#systemProp.https.proxyHost=host
-#systemProp.https.proxyPort=port
-#systemProp.https.proxyUser=username
-#systemProp.https.proxyPassword=password
-#systemProp.https.nonProxyHosts=local.net|some.host.com
-## end of proxy setup
-
-########## Docker ##########
-#
-#Depending on your OS, you have to edit a specific file (/etc/sysconfig/docker or /etc/default/docker).
-#Then, you have to restart the docker service with: sudo service docker restart.
-#
-#It will not apply to systemd. https://docs.docker.com/config/daemon/systemd/.
-#Docker with docker-machine
-#
-#You can create your docker-machine with:
-#docker-machine create -d virtualbox \
-#    --engine-env HTTP_PROXY=http://username:password@host:port \
-#    --engine-env HTTPS_PROXY=http://username:password@host:port \
-#    default
-#
-#Or you can edit the file ~/.docker/machine/machines/default/config.json.
-#
-
 while [[ $DOACTION != "q" ]]
 do
     print_menu
@@ -610,9 +500,12 @@ do
         build_catapult
     fi
     if [[ $DOACTION == "4" ]] ; then
-        install_rest
+        install_mongo
     fi
     if [[ $DOACTION == "5" ]] ; then
+        install_rest
+    fi
+    if [[ $DOACTION == "6" ]] ; then
         init_seed
     fi
     if [[ $DOACTION == "9" ]] ; then
