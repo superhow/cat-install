@@ -12,7 +12,6 @@ boost_ver=1.72.0
 openssl_ver=1.1.1g
 cd
 [ -d $HOME/src ] && echo "Directory src Exists" || mkdir $HOME/src
-[ -d $HOME/catapult ] && echo "Directory catapult Exists" || mkdir $HOME/catapult
 # echo "Be sure to use screen before running. There will be several prompts for sudo password"
 # echo "This script is prepared to be executed with user 'root' or any other user"
 
@@ -316,6 +315,8 @@ function build_catapult_server() {
     # Build CATAPULT server
     [ -d /opt/catapult ] && echo "Directory Exists" || mkdir $HOME/catapult
     [ -d /opt/catapult ] && echo "Directory Exists" || sudo -E mv $HOME/catapult /opt/catapult
+    mkdir $HOME/catapult
+    mkdir /opt/catapult/tests
 
     cd $HOME/src/ && git clone https://github.com/nemtech/catapult-server.git
     cd catapult-server/
@@ -332,8 +333,7 @@ function build_catapult_server() {
     mv $HOME/src/catapult-server/_build/bin /opt/catapult/bin
     cp -r $HOME/src/catapult-server/scripts $HOME/catapult/scripts
     cp -r $HOME/src/catapult-server/scripts /opt/catapult/scripts
-    mkdir /opt/catapult/bin/tests
-    mv /opt/catapult/bin/tests* /opt/catapult/bin/tests/
+    mv /opt/catapult/bin/tests* /opt/catapult/tests/
 }
 
 function install_mongo() {
