@@ -359,8 +359,8 @@ function install_mongodb() {
     sudo systemctl disable mongodb
     sudo apt-get -y remove mongodb
     sudo apt-get -y autoremove
-    sudo rm -r /var/log/mongodb
-    sudo rm -r /var/lib/mongodb
+    #sudo rm -r /var/log/mongodb
+    #sudo rm -r /var/lib/mongodb
     
     # Install MongoDB 4.2. MANDATORY only API
     curl -sL https://www.mongodb.org/static/pgp/server-4.2.asc | sudo -E apt-key add -
