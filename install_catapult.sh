@@ -330,10 +330,10 @@ function build_catapult_server() {
     ninja publish
     ninja -j $(nproc)
     mv $HOME/src/catapult-server/_build/bin /opt/catapult/bin
-    mv $HOME/src/catapult-server/_build/lib /opt/catapult/lib
-    mv $HOME/src/catapult-server/_build/inc /opt/catapult/inc
     cp -r $HOME/src/catapult-server/scripts $HOME/catapult/scripts
     cp -r $HOME/src/catapult-server/scripts /opt/catapult/scripts
+    mkdir /opt/catapult/bin/tests
+    mv /opt/catapult/bin/tests* /opt/catapult/bin/tests/
 }
 
 function install_mongo() {
