@@ -21,11 +21,9 @@ function print_menu() {
     echo
     echo "+================================================================+"
     echo "| Symbol CATAPULT install and build script by SUPER HOW?         |"
-    echo "|    - build and install all Symbol CATAPULT dependancies        |"
+    echo "|    - build and install Symbol CATAPULT dependancies            |"
     echo "|    - build and install Symbol CATAPULT v${CAT_VER}                |"
-    echo "|    - generate Symbol CATAPULT seed                             |"
     echo "|+                                                              +|"
-    echo "| Script to be run by limited user, will need sudo rights        |"
     echo "| Prerequisites from github/nemtech for building on Ubuntu 18.04 |"
     echo "|    - OpenSSL dev library, at least 1.1.1 (libssl-dev)          |"
     echo "|    - cmake (at least 3.17)                                     |"
@@ -45,8 +43,9 @@ function print_menu() {
     echo "|  1) Step 1: Build System dependencies: GCC, Cmake, Boost, etc. |"
     echo "|  2) Step 2: Build CAT dependencies: gtest, mongocxx, rocksdb.. |"
     echo "|  3) Step 3: Build Symbol CATAPULT mijin from git               |"
-    echo "|  4) Step 4: Build mongodb, NODE.JS and CATAPULT REST           |"
-    echo "|  5) Step 5: Generate keys and instialize CATAPULT seed         |"
+    echo "|  4) Step 4: Build mongodb v4.2.7                               |"
+    echo "|  5) Step 5: Build NODE.JS and CATAPULT REST                    |"
+    echo "|  6) Step 5: Generate keys and instialize CATAPULT seed         |"
     echo "|  9) Setup Firewall and change SSH port (TODO)                  |"
     echo "|  0) Tool: Just do system update & upgrade                      |"	
     echo "|                                                                |"
@@ -340,7 +339,7 @@ function install_mongo() {
     clear
     echo
     echo "+================================================================+"
-    echo "|             Install MONGODB? [y/n]"
+    echo "|             Install MONGODB v4.2.7? [y/n]"
     echo "|             CATAPULT version: ${CAT_VER}"
     echo "+================================================================+"
     echo
@@ -380,7 +379,7 @@ function install_rest() {
     clear
     echo
     echo "+================================================================+"
-    echo "|             Install NODE.JS, CATAPULT REST? [y/n]"
+    echo "|             Install NODE.JS v12, CATAPULT REST? [y/n]"
     echo "|             CATAPULT version: ${CAT_VER}"
     echo "+================================================================+"
     echo
