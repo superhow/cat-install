@@ -2,13 +2,16 @@
 # Install and build Symbol catapult server and dependancies interactive script version v1.0
 # Copyright (c) 2020 superhow, ministras, SUPER HOW UAB licensed under the GNU Lesser General Public License v3
 
-SCRIPT_VER=1.K-proxy
+set -e
+SCRIPT_VER=1.P.proxy.unsecure
 SSH_PORT=22
-CAT_VER=0.9.3.2
+CAT_VER=0.9.5.1
 cmake_ver=3.17.0
 boost_v=1_72_0
 boost_ver=1.72.0
+openssl_ver=1.1.1g
 cd
+[ -d $HOME/src ] && echo "Directory src Exists" || mkdir $HOME/src
 # echo "Be sure to use screen before running. There will be several prompts for sudo password"
 # echo "This script is prepared to be executed with user 'root' or any other user"
 
@@ -18,11 +21,9 @@ function print_menu() {
     echo
     echo "+================================================================+"
     echo "| Symbol CATAPULT install and build script by SUPER HOW?         |"
-    echo "|    - build and install all Symbol CATAPULT dependancies        |"
+    echo "|    - build and install Symbol CATAPULT dependancies            |"
     echo "|    - build and install Symbol CATAPULT v${CAT_VER}                |"
-    echo "|    - generate Symbol CATAPULT seed                             |"
     echo "|+                                                              +|"
-    echo "| Script to be run by limited user, will need sudo rights        |"
     echo "| Prerequisites from github/nemtech for building on Ubuntu 18.04 |"
     echo "|    - OpenSSL dev library, at least 1.1.1 (libssl-dev)          |"
     echo "|    - cmake (at least 3.17)                                     |"
@@ -42,8 +43,9 @@ function print_menu() {
     echo "|  1) Step 1: Build System dependencies: GCC, Cmake, Boost, etc. |"
     echo "|  2) Step 2: Build CAT dependencies: gtest, mongocxx, rocksdb.. |"
     echo "|  3) Step 3: Build Symbol CATAPULT mijin from git               |"
-    echo "|  4) Step 4: Build mongodb, NODE.JS and CATAPULT REST           |"
-    echo "|  5) Step 5: Generate keys and instialize CATAPULT seed         |"
+    echo "|  4) Step 4: Build mongodb v4.2.7                               |"
+    echo "|  5) Step 5: Build NODE.JS and CATAPULT REST                    |"
+    echo "|  6) Step 6: Generate keys and instialize CATAPULT seed         |"
     echo "|  9) Setup Firewall and change SSH port (TODO)                  |"
     echo "|  0) Tool: Just do system update & upgrade                      |"	
     echo "|                                                                |"
@@ -54,7 +56,7 @@ function print_menu() {
     echo "|                                                                |"
     echo "|  q) Quit                                                       |"
     echo "+================================================================+"
-	echo
+    echo
 }
 
 function os_version_check() {
@@ -78,12 +80,13 @@ function build_base() {
     if [[ $DOINSTALL =~ "y" ]] || [[ $DOINSTALL =~ "Y" ]] ; then
         # change_ssh_port
         # firewall_setup
-        do_system_update
+        set -x
+	do_system_update
         install_dependancies
         install_cmake
         install_boost
-        # echo "Ar viskas gerai?"
-        # read ANYKEY
+	#install_openssl
+	set +x
     fi
 }
 
@@ -97,8 +100,8 @@ function do_system_update() {
 }
 
 function install_dependancies() {
-    sudo apt-get --yes install autoconf automake build-essential curl cmake git gcc g++ gdb mc ninja-build pkg-config python3 python3-ply python-dev
-    sudo apt-get --yes install libtool libssl-dev libatomic-ops-dev libunwind-dev libgflags-dev libsnappy-dev libxml2-dev libxslt-dev screen zsh xz-utils
+    sudo apt-get --yes install autoconf automake build-essential checkinstall curl git gcc g++ gdb mc ninja-build pkg-config python3 python3-ply python-dev
+    sudo apt-get --yes install libtool libssl-dev libatomic-ops-dev libunwind-dev libgflags-dev libsnappy-dev libxml2-dev libxslt-dev screen zlib1g-dev zsh xz-utils
     #TODO patikrinti ar sitie vis dar reikalingi: libatomic-ops-dev libunwind-dev libgflags-dev libsnappy-dev libxml2-dev libxslt-dev
     #Install new version of GCC v9.2: https://linuxize.com/post/how-to-install-gcc-compiler-on-ubuntu-18-04/
     sudo -E apt-get --yes install software-properties-common
@@ -106,25 +109,27 @@ function install_dependancies() {
     sudo -E add-apt-repository --yes ppa:deadsnakes/ppa
     sudo -E apt-get --yes install gcc-9 g++-9 python3.7
     sudo -E apt-get --yes autoremove
+    
     #register priority default GCC versions
-    sudo -E update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 90 --slave /usr/bin/g++ g++ /usr/bin/g++-9 --slave /usr/bin/gcov gcov /usr/bin/gcov-9
-    #to fall back to native GCC: 
-    #sudo update-alternatives --config gcc
+    sudo -E update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 90
+    sudo -E update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 90
 }
 
 function install_cmake() {
-    # CMAKE v3.15.4 or v3.17.0
+    # v3.17.0
     echo
     echo "Installing Cmake ${cmake_ver}"
     echo
+    cd $HOME/src/
     sudo apt-get --yes --auto-remove purge cmake
-    wget https://github.com/Kitware/CMake/releases/download/v${cmake_ver}/cmake-${cmake_ver}.tar.gz
+    wget http://github.com/Kitware/CMake/releases/download/v${cmake_ver}/cmake-${cmake_ver}.tar.gz
     tar -xzvf cmake-${cmake_ver}.tar.gz
     rm cmake-${cmake_ver}.tar.gz
     cd cmake-${cmake_ver}/
     ./bootstrap
     make -j $(nproc)
     sudo make install
+    
     echo
     echo "Check CMAKE version:"
     echo
@@ -139,16 +144,54 @@ function install_boost() {
     echo
     echo "Installing BOOST ${boost_ver}"
     echo
-    cd && curl -o boost_${boost_v}.tar.gz -SL https://dl.bintray.com/boostorg/release/${boost_ver}/source/boost_${boost_v}.tar.gz
-    tar -xzf boost_${boost_v}.tar.gz
-    rm boost_${boost_v}.tar.gz
+    rm -rf /opt/boost/
     mkdir $HOME/boost 
     sudo -E mv $HOME/boost /opt/boost
+    
+    cd $HOME/src/
+    wget http://dl.bintray.com/boostorg/release/${boost_ver}/source/boost_${boost_v}.tar.gz
+    tar -xzf boost_${boost_v}.tar.gz
+    rm boost_${boost_v}.tar.gz
     cd boost_${boost_v}/
     ./bootstrap.sh --prefix=/opt/boost
     ./b2 --prefix=/opt/boost --without-python -j $(nproc) stage release
     ./b2 --prefix=/opt/boost --without-python install
-	#rm -rf boost_${boost_v}/
+    #rm -rf boost_${boost_v}/
+}
+
+function install_openssl() {
+    # OpenSSL v1.1.1g
+    echo
+    echo "Installing OpenSSL ${openssl_ver}"
+    echo
+    openssl version -a
+    cd $HOME/src/
+    wget http://www.openssl.org/source/openssl-${openssl_ver}.tar.gz
+    tar -xf openssl-${openssl_ver}.tar.gz
+    rm openssl-${openssl_ver}.tar.gz
+    cd openssl-${openssl_ver}
+    ./config --prefix=/usr/local/ssl --openssldir=/usr/local/ssl shared zlib
+    make
+    make test
+    sudo make install
+    
+    #Configure OpenSSl shared libraries
+    echo "/usr/local/ssl/lib" | sudo tee /etc/ld.so.conf.d/openssl-${openssl_ver}.conf
+    
+    # Reload dynamic link
+    sudo ldconfig -v
+    
+    # Configure OpenSSL Binary
+    sudo mv /usr/bin/c_rehash /usr/bin/c_rehash.backup
+    sudo mv /usr/bin/openssl /usr/bin/openssl.backup
+    
+    sudo nano /etc/environment
+    #PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/local/ssl/bin"
+    
+    source /etc/environment
+    echo $PATH
+    which openssl
+    openssl version -a
 }
 
 function build_dependancies() {
@@ -161,22 +204,21 @@ function build_dependancies() {
     echo
     read DOINSTALL
     if [[ $DOINSTALL =~ "y" ]] || [[ $DOINSTALL =~ "Y" ]] ; then
-        sudo apt-get update
-        build_gtest
+        set -x
+	sudo apt-get update
+	build_gtest
         build_benchmark
         build_mongoc
         build_mongocxx
         build_zmq
         build_rocksdb
-        #echo "Ar viskas gerai?"
-        #read ANYKEY
-        #build_catapult_server_9_3_2
+	set +x
     fi
 }
 
 function build_gtest() {
     # Gtest
-    cd && git clone https://github.com/google/googletest.git
+    cd $HOME/src/ && git clone http://github.com/google/googletest.git
     cd googletest/
     git checkout release-1.8.1
     mkdir _build && cd _build
@@ -187,7 +229,7 @@ function build_gtest() {
 
 function build_benchmark() {
     # Google benchmark
-    cd && git clone https://github.com/google/benchmark.git
+    cd $HOME/src/ && git clone http://github.com/google/benchmark.git
     cd benchmark/
     git checkout v1.5.0
     mkdir _build && cd _build
@@ -198,7 +240,7 @@ function build_benchmark() {
 
 function build_mongoc() {
     # Mongo driver mongo-c
-    cd && git clone https://github.com/mongodb/mongo-c-driver.git
+    cd $HOME/src/ && git clone http://github.com/mongodb/mongo-c-driver.git
     cd mongo-c-driver/
     git checkout 1.15.1
     mkdir _build && cd _build
@@ -209,7 +251,7 @@ function build_mongoc() {
 
 function build_mongocxx() {
     # Mongo driver mongo-c++
-    cd && git clone https://github.com/nemtech/mongo-cxx-driver.git
+    cd $HOME/src/ && git clone http://github.com/nemtech/mongo-cxx-driver.git
     cd mongo-cxx-driver/
     git checkout r3.4.0-nem
     #TODO: find out why do we need maxAwaitTimeMS patch...
@@ -223,7 +265,7 @@ function build_mongocxx() {
 
 function build_zmq() {
     # ZMQ libzmq
-    cd && git clone https://github.com/zeromq/libzmq.git
+    cd $HOME/src/ && git clone http://github.com/zeromq/libzmq.git
     cd libzmq/
     git checkout v4.3.2
     mkdir _build && cd _build
@@ -232,7 +274,7 @@ function build_zmq() {
     sudo make install
 
     # ZMQ cppzmq
-    cd && git clone https://github.com/zeromq/cppzmq.git
+    cd $HOME/src/ && git clone http://github.com/zeromq/cppzmq.git
     cd cppzmq/
     git checkout v4.4.1
     mkdir _build && cd _build
@@ -243,7 +285,7 @@ function build_zmq() {
 
 function build_rocksdb() {
     # RocksDB
-    cd && git clone https://github.com/nemtech/rocksdb.git
+    cd $HOME/src/ && git clone http://github.com/nemtech/rocksdb.git
     cd rocksdb/
     git checkout v6.6.4-nem
     mkdir _build
@@ -251,8 +293,6 @@ function build_rocksdb() {
     # cmake -DCMAKE_BUILD_TYPE=Release -DWITH_TESTS=OFF . -DCMAKE_INSTALL_PREFIX=/usr/local ..
     # make
     sudo make install-shared
-    #echo "All good?"
-    #read ANYKEY
 }
 
 function build_catapult() {
@@ -264,94 +304,113 @@ function build_catapult() {
     echo
     read DOINSTALL
     if [[ $DOINSTALL =~ "y" ]] || [[ $DOINSTALL =~ "Y" ]] ; then
-        sudo apt-get update
+        set -x
+	sudo apt-get update
         build_catapult_server
-        #build_catapult_superhow_9_3_2
-        echo "All good?"
-        read ANYKEY
+	set +x
     fi
-}
-
-function build_catapult_superhow_9_3_2() {
-    # CATAPULT server
-    cd && git clone https://bitbucket.org/superhow/catapult-server.git -b release
-    cd catapult-server/
-    export HASHING_FUNCTION=sha3
-    mkdir build && cd build # replacing _build to build. for future scripts
-    #mkdir _build && cd _build
-    cmake -DBOOST_ROOT=/opt/boost -DCMAKE_BUILD_TYPE=Release -G Ninja ..
-    ninja publish
-    ninja -j $(nproc)
 }
 
 function build_catapult_server() {
     # Build CATAPULT server
-    mkdir $HOME/catapult 
-    sudo -E mv $HOME/catapult /opt/catapult
+    [ -d /opt/catapult ] && echo "Directory Exists" || mkdir $HOME/catapult
+    [ -d /opt/catapult ] && echo "Directory Exists" || sudo -E mv $HOME/catapult /opt/catapult
+    mkdir $HOME/catapult
+    mkdir /opt/catapult/tests
 
-    cd && git clone https://github.com/nemtech/catapult-server.git
+    cd $HOME/src/ && git clone http://github.com/nemtech/catapult-server.git
     cd catapult-server/
     git checkout v${CAT_VER}
-    export HASHING_FUNCTION=sha3
 
     #mkdir build && cd build # replacing _build to build. for future scripts
     mkdir _build && cd _build
     #cmake -DBOOST_ROOT=/opt/boost -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/catapult -G Ninja ..
-    cmake -DBOOST_ROOT=/opt/boost -DCMAKE_BUILD_TYPE=Release -DCMAKE_BINARY_DIR=/opt/catapult -G Ninja ..
+    #-DCMAKE_BINARY_DIR=/opt/catapult
+    cmake -DBOOST_ROOT=/opt/boost -DCMAKE_BUILD_TYPE=Release -G Ninja ..
     # bootstrapinam boost root i /opt/boost, install i /opt/catapult reikia pabandyti
     ninja publish
     ninja -j $(nproc)
+    mv $HOME/src/catapult-server/_build/bin /opt/catapult/bin
+    cp -r $HOME/src/catapult-server/scripts $HOME/catapult/scripts
+    cp -r $HOME/src/catapult-server/scripts /opt/catapult/scripts
+    mv /opt/catapult/bin/tests* /opt/catapult/tests/
+}
+
+function install_mongo() {
+    clear
+    echo
+    echo "+================================================================+"
+    echo "|             Install MONGODB v4.2.7? [y/n]"
+    echo "|             CATAPULT version: ${CAT_VER}"
+    echo "+================================================================+"
+    echo
+    read DOINSTALL
+    if [[ $DOINSTALL =~ "y" ]] || [[ $DOINSTALL =~ "Y" ]] ; then
+        set -x
+	install_mongodb
+        set +x
+    fi
+}
+
+function install_mongodb() {
+    # Remove old MongoDB
+    cd
+    sudo systemctl stop mongodb
+    sudo systemctl disable mongodb
+    sudo apt-get -y remove mongodb
+    sudo apt-get -y autoremove
+    #sudo rm -r /var/log/mongodb
+    #sudo rm -r /var/lib/mongodb
+    
+    # Install MongoDB 4.2. MANDATORY only API
+    curl -sL http://www.mongodb.org/static/pgp/server-4.2.asc | sudo -E apt-key add -
+    echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.2.list
+    sudo apt-get update
+    sudo apt-get install -y mongodb-org
+    echo "mongodb-org hold" | sudo dpkg --set-selections
+    echo "mongodb-org-server hold" | sudo dpkg --set-selections
+    echo "mongodb-org-shell hold" | sudo dpkg --set-selections
+    echo "mongodb-org-mongos hold" | sudo dpkg --set-selections
+    echo "mongodb-org-tools hold" | sudo dpkg --set-selections
+    sudo systemctl start mongod
+    sudo systemctl enable mongod    
+    sudo systemctl status mongod
 }
 
 function install_rest() {
     clear
     echo
     echo "+================================================================+"
-    echo "|             Install MONGODB, NODE.JS, CATAPULT REST? [y/n]"
+    echo "|             Install NODE.JS v12, CATAPULT REST? [y/n]"
     echo "|             CATAPULT version: ${CAT_VER}"
     echo "+================================================================+"
     echo
     read DOINSTALL
     if [[ $DOINSTALL =~ "y" ]] || [[ $DOINSTALL =~ "Y" ]] ; then
-        install_mongodb
+        set -x
+	#install_mongodb
         install_node_js
-        echo "All good?"
-        read ANYKEY
         install_catapult_rest
+	set +x
     fi
-}
-
-function install_mongodb() {
-    # Install MongoDB. MANDATORY
-    cd
-    sudo apt-get update
-    sudo apt-get --yes install mongodb
-    sudo systemctl start mongodb
-    sudo systemctl enable mongodb
-    sudo systemctl status mongodb
 }
 
 function install_node_js() {
     # Install Node.js v10 & yarn for REST API
     cd
-    curl -sSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | sudo apt-key add -
-    local VERSION=node_12.x
-    local DISTRO="$(lsb_release -s -c)"
-    echo "deb http://deb.nodesource.com/$VERSION $DISTRO main" | sudo tee /etc/apt/sources.list.d/nodesource.list
-    echo "deb-src http://deb.nodesource.com/$VERSION $DISTRO main" | sudo tee -a /etc/apt/sources.list.d/nodesource.list
-    sudo apt-get update
+    curl -sL http://deb.nodesource.com/setup_12.x | sudo -E bash -
     sudo apt-get --yes install nodejs
-    curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
-    echo "deb http://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+    curl -sL http://dl.yarnpkg.com/debian/pubkey.gpg | sudo -E apt-key add -
+    echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
     sudo apt-get update
     sudo apt-get --yes install yarn
 }
 
 function install_catapult_rest() {
     # Install REST API
-    cd && git clone https://github.com/nemtech/catapult-rest.git
+    cd && git clone http://github.com/nemtech/catapult-rest.git
     cd catapult-rest/
-    export HASHING_FUNCTION=sha3
+    git checkout v0.7.20.34
     ./yarn_setup.sh
     cd rest/
     yarn build
@@ -367,8 +426,10 @@ function init_seed() {
     echo
     read DOINSTALL
     if [[ $DOINSTALL =~ "y" ]] || [[ $DOINSTALL =~ "Y" ]] ; then
-        generate_accounts
+        set -x
+	generate_accounts
         initialize_seed
+	set +x
     fi
 }
 
@@ -382,54 +443,19 @@ function generate_accounts() {
     read ACCOUNT_COUNT
     # Generate 3 accounts for "nemesis_signer" , "node owner" and "REST owner"!!!
     # Generate 3 additional accounts for "api owner", peer1 owner" and "peer2 owner"!!!
-    cd /opt/catapult
-    # mkdir catapult-node
+    cd $HOME/catapult/
     # catapult-node && mkdir data && mkdir nemesis && mkdir resources && mkdir scripts && mkdir seed
-    /opt/catapult/bin/catapult.tools.address -g ${ACCOUNT_COUNT} --network mijin | tee /opt/catapult/nemesis_signer.txt
-    cd /opt/catapult
-    mkdir nemesis && mkdir data && mkdir tmp
+    /opt/catapult/bin/catapult.tools.address -g ${ACCOUNT_COUNT} --network mijin | tee $HOME/catapult/nemesis_signer.txt
 }
 
 function initialize_seed() {
-    cd ${HOME}/catapult/scripts
-    git clone https://github.com/superhow/cat-config.git
+    cd $HOME/catapult/scripts
+    git clone http://github.com/superhow/cat-config.git
     
     # First private and public keys from the file ~/catapult/nemesis_signer.txt --local (local node) --dual (peer & api in one)
-    cd /opt/catapult
+    cd $HOME/catapult/
     # zsh scripts/cat-config/reset.sh --local dual ~/catapult <private_key> <public_key>
 }
-
-# Need to make changes to the configuration files - catapult/recources change the necessary parameters.
-# 1.
-# config-harvesting.properties
-#       harvesterPrivateKey = <FIRST PRIVATE key from the file catapult/harvester_addresses.txt>
-# 2.
-# config-node.properties
-#       enableSingleThreadPool = false
-# 3.
-# config-user.properties
-#       [account]
-#       bootPrivateKey = <SECOND PRIVATE key from the file catapult/harvester_addresses.txt>
-#       shouldAutoDetectDelegatedHarvesters = true
-#       [storage]
-#       dataDirectory = ../data
-#       pluginsDirectory =
-# 4.
-#       "publicKey": <FIRST PUBLIC key from the file catapult/harvester_addresses.txt>
-# 5.
-# peer-p2p.json
-#       "publicKey": <SECOND PUBLIC key from the file catapult/harvester_addresses.txt>
-
-# Configure REST API
-# 1.
-# catapult-rest/rest/resources/rest.json
-#       "clientPrivateKey": <THIRD PRIVATE key from the file catapult/harvester_addresses.txt
-#       "apiNode": {
-#           "host": "127.0.0.1",
-#           "port": 7900,
-#           "publicKey": <SECOND PUBLIC key from the file catapult/harvester_addresses.txt>,
-#           "timeout": 1000
-# },
 
 # # === Firewall ===
 # function firewall_setup() {
@@ -475,9 +501,12 @@ do
         build_catapult
     fi
     if [[ $DOACTION == "4" ]] ; then
-        install_rest
+        install_mongo
     fi
     if [[ $DOACTION == "5" ]] ; then
+        install_rest
+    fi
+    if [[ $DOACTION == "6" ]] ; then
         init_seed
     fi
     if [[ $DOACTION == "9" ]] ; then
