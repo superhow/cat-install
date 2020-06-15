@@ -3,7 +3,7 @@
 # Copyright (c) 2020 superhow, ministras, SUPER HOW UAB licensed under the GNU Lesser General Public License v3
 
 set -e
-SCRIPT_VER=1.O
+SCRIPT_VER=1.P
 SSH_PORT=22
 CAT_VER=0.9.5.1
 cmake_ver=3.17.0
@@ -149,7 +149,7 @@ function install_boost() {
     sudo -E mv $HOME/boost /opt/boost
     
     cd $HOME/src/
-    curl -o boost_${boost_v}.tar.gz -SL https://dl.bintray.com/boostorg/release/${boost_ver}/source/boost_${boost_v}.tar.gz
+    wget https://dl.bintray.com/boostorg/release/${boost_ver}/source/boost_${boost_v}.tar.gz
     tar -xzf boost_${boost_v}.tar.gz
     rm boost_${boost_v}.tar.gz
     cd boost_${boost_v}/
