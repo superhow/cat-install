@@ -100,8 +100,8 @@ function do_system_update() {
 }
 
 function install_dependancies() {
-    sudo apt-get --yes install autoconf automake build-essential checkinstall curl cmake git gcc g++ gdb mc ninja-build pkg-config python3 python3-ply python-dev
-    sudo apt-get --yes install libtool libssl-dev libatomic-ops-dev libunwind-dev libgflags-dev libsnappy-dev libxml2-dev libxslt-dev screen zlib1g-dev zsh xz-utils
+    sudo apt-get --yes install autoconf automake build-essential checkinstall curl gdb mc ninja-build pkg-config python3 python3-ply python-dev
+    sudo apt-get --yes install libtool libssl-dev libatomic-ops-dev libunwind-dev libgflags-dev libsnappy-dev libxml2-dev libxslt-dev zlib1g-dev zsh xz-utils
     #TODO patikrinti ar sitie vis dar reikalingi: libatomic-ops-dev libunwind-dev libgflags-dev libsnappy-dev libxml2-dev libxslt-dev
     #Install new version of GCC v9.2: https://linuxize.com/post/how-to-install-gcc-compiler-on-ubuntu-18-04/
     sudo -E apt-get --yes install software-properties-common
@@ -121,7 +121,8 @@ function install_cmake() {
     echo "Installing Cmake ${cmake_ver}"
     echo
     cd $HOME/src/
-    sudo apt-get --yes --auto-remove purge cmake
+    sudo apt-get --yes purge cmake
+    sudo apt-get --yes autoremove
     wget https://github.com/Kitware/CMake/releases/download/v${cmake_ver}/cmake-${cmake_ver}.tar.gz
     tar -xzvf cmake-${cmake_ver}.tar.gz
     rm cmake-${cmake_ver}.tar.gz
