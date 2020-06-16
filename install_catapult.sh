@@ -3,7 +3,7 @@
 # Copyright (c) 2020 superhow, ministras, SUPER HOW UAB licensed under the GNU Lesser General Public License v3
 
 set -e
-SCRIPT_VER=1.P
+SCRIPT_VER=1.R
 SSH_PORT=22
 CAT_VER=0.9.5.1
 cmake_ver=3.17.0
@@ -360,8 +360,8 @@ function install_mongodb() {
     sudo systemctl disable mongodb
     sudo apt-get -y remove mongodb
     sudo apt-get -y autoremove
-    #sudo rm -r /var/log/mongodb
-    #sudo rm -r /var/lib/mongodb
+    sudo rm -rf /var/log/mongodb
+    sudo rm -rf /var/lib/mongodb
     
     # Install MongoDB 4.2. MANDATORY only API
     curl -sL https://www.mongodb.org/static/pgp/server-4.2.asc | sudo -E apt-key add -
