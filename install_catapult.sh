@@ -362,6 +362,9 @@ function install_mongodb() {
     sudo apt-get -y autoremove
     sudo rm -rf /var/log/mongodb
     sudo rm -rf /var/lib/mongodb
+    #sudo rm -rf /etc/systemd/system/mongo.service
+    #sudo systemctl daemon-reload
+    #sudo systemctl reset-failed
     
     # Install MongoDB 4.2. MANDATORY only API
     curl -sL https://www.mongodb.org/static/pgp/server-4.2.asc | sudo -E apt-key add -
