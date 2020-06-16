@@ -145,7 +145,7 @@ function install_boost() {
     echo
     echo "Installing BOOST ${boost_ver}"
     echo
-    rm -rf /opt/boost/
+    sudo rm -rf /opt/boost/
     mkdir $HOME/boost 
     sudo -E mv $HOME/boost /opt/boost
     
