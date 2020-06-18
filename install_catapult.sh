@@ -414,7 +414,7 @@ function install_catapult_rest() {
     # Install REST API
     cd && git clone https://github.com/nemtech/catapult-rest.git
     cd catapult-rest/
-    git checkout v0.7.20.34
+    git checkout v1.0.20.50
     ./yarn_setup.sh
     cd rest/
     yarn build
