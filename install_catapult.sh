@@ -43,7 +43,7 @@ function print_menu() {
     echo "|  1) Step 1: Build System dependencies: GCC, Cmake, Boost, etc. |"
     echo "|  2) Step 2: Build CAT dependencies: gtest, mongocxx, rocksdb.. |"
     echo "|  3) Step 3: Build Symbol CATAPULT mijin from git               |"
-    echo "|  4) Step 4: Build mongodb v4.2.7                               |"
+    echo "|  4) Step 4: Build mongodb v4.2.8                               |"
     echo "|  5) Step 5: Build NODE.JS and CATAPULT REST                    |"
     echo "|  6) Step 6: Generate keys and instialize CATAPULT seed         |"
     echo "|  9) Setup Firewall and change SSH port (TODO)                  |"
@@ -141,7 +141,7 @@ function install_cmake() {
 }
 
 function install_boost() {
-    # Boost - c++ v1.71.0 or v1.72.0
+    # Boost - c++ v1.72.0
     echo
     echo "Installing BOOST ${boost_ver}"
     echo
@@ -341,7 +341,7 @@ function install_mongo() {
     clear
     echo
     echo "+================================================================+"
-    echo "|             Install MONGODB v4.2.7? [y/n]"
+    echo "|             Install MONGODB v4.2.8? [y/n]"
     echo "|             CATAPULT version: ${CAT_VER}"
     echo "+================================================================+"
     echo
@@ -400,7 +400,7 @@ function install_rest() {
 }
 
 function install_node_js() {
-    # Install Node.js v10 & yarn for REST API
+    # Install Node.js v12 & yarn for REST API
     cd
     curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
     sudo apt-get --yes install nodejs
