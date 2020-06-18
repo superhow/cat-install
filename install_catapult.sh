@@ -356,13 +356,13 @@ function install_mongo() {
 function install_mongodb() {
     # Remove old MongoDB
     cd
-    sudo systemctl stop mongodb
-    sudo systemctl disable mongodb
+    #sudo systemctl stop mongodb
+    #sudo systemctl disable mongodb
     sudo apt-get -y remove mongodb
     sudo apt-get -y autoremove
     sudo rm -rf /var/log/mongodb
     sudo rm -rf /var/lib/mongodb
-    #sudo rm -rf /etc/systemd/system/mongo.service
+    sudo rm -rf /etc/systemd/system/mongo.service
     #sudo systemctl daemon-reload
     #sudo systemctl reset-failed
     
