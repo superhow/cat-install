@@ -3,9 +3,9 @@
 # Copyright (c) 2020 superhow, ministras, SUPER HOW UAB licensed under the GNU Lesser General Public License v3
 
 set -e
-SCRIPT_VER=1.R
+SCRIPT_VER=1.S
 SSH_PORT=22
-CAT_VER=0.9.5.1
+CAT_VER=0.9.6.3
 cmake_ver=3.17.0
 boost_v=1_72_0
 boost_ver=1.72.0
@@ -94,20 +94,18 @@ function do_system_update() {
     sudo apt-get update
     sudo apt-get --yes upgrade
     sudo apt-get --yes autoremove
-    ulimit -n 4096
-    #sudo apt-get -y --fix-missing upgrade  # kai neranda tam tikrų paketų 
-    #sudo apt-get -y dist-upgrade 
 }
 
 function install_dependancies() {
-    sudo apt-get --yes install autoconf automake build-essential checkinstall curl gdb mc ninja-build pkg-config python3 python3-ply python-dev
+    sudo apt-get --yes install autoconf automake build-essential checkinstall curl gdb mc ninja-build pkg-config python python-dev
     sudo apt-get --yes install libtool libssl-dev libatomic-ops-dev libunwind-dev libgflags-dev libsnappy-dev libxml2-dev libxslt-dev zlib1g-dev zsh xz-utils
-    #TODO patikrinti ar sitie vis dar reikalingi: libatomic-ops-dev libunwind-dev libgflags-dev libsnappy-dev libxml2-dev libxslt-dev
+    #TODO check if these are needed: libatomic-ops-dev libunwind-dev libgflags-dev libsnappy-dev libxml2-dev libxslt-dev
     #Install new version of GCC v9.2: https://linuxize.com/post/how-to-install-gcc-compiler-on-ubuntu-18-04/
     sudo -E apt-get --yes install software-properties-common
     sudo -E add-apt-repository --yes ppa:ubuntu-toolchain-r/test
     sudo -E add-apt-repository --yes ppa:deadsnakes/ppa
-    sudo -E apt-get --yes install gcc-9 g++-9 python3.7
+    sudo -E apt update
+    sudo -E apt-get --yes install gcc-9 g++-9 python3.8 python3-ply
     sudo -E apt-get --yes autoremove
     
     #register priority default GCC versions
@@ -135,6 +133,7 @@ function install_cmake() {
     echo "Check CMAKE version:"
     echo
     cd && cmake --version
+    python --version
     python3 --version
     gcc --version
     #rm -rf cmake-${cmake_ver}/
@@ -300,7 +299,7 @@ function build_catapult() {
     clear
     echo
     echo "+================================================================+"
-    echo "|   Build catapult server v${CAT_VER} from SUPER HOW git? [y/n]"
+    echo "|   Build catapult server v${CAT_VER} from git? [y/n]"
     echo "+================================================================+"
     echo
     read DOINSTALL
@@ -323,10 +322,7 @@ function build_catapult_server() {
     cd catapult-server/
     git checkout v${CAT_VER}
 
-    #mkdir build && cd build # replacing _build to build. for future scripts
     mkdir _build && cd _build
-    #cmake -DBOOST_ROOT=/opt/boost -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/catapult -G Ninja ..
-    #-DCMAKE_BINARY_DIR=/opt/catapult
     cmake -DBOOST_ROOT=/opt/boost -DCMAKE_BUILD_TYPE=Release -G Ninja ..
     # bootstrapinam boost root i /opt/boost, install i /opt/catapult reikia pabandyti
     ninja publish
@@ -358,11 +354,11 @@ function install_mongodb() {
     cd
     #sudo systemctl stop mongodb
     #sudo systemctl disable mongodb
-    sudo apt-get -y remove mongodb
-    sudo apt-get -y autoremove
-    sudo rm -rf /var/log/mongodb
-    sudo rm -rf /var/lib/mongodb
-    sudo rm -rf /etc/systemd/system/mongo.service
+    #sudo apt-get -y remove mongodb
+    #sudo apt-get -y autoremove
+    #sudo rm -rf /var/log/mongodb
+    #sudo rm -rf /var/lib/mongodb
+    #sudo rm -rf /etc/systemd/system/mongo.service
     #sudo systemctl daemon-reload
     #sudo systemctl reset-failed
     
@@ -414,7 +410,7 @@ function install_catapult_rest() {
     # Install REST API
     cd && git clone https://github.com/nemtech/catapult-rest.git
     cd catapult-rest/
-    git checkout v1.0.20.50
+    git checkout v1.1.3
     ./yarn_setup.sh
     cd rest/
     yarn build
